@@ -7,10 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { getAuthSession } from "@/lib/nextauth";
-import { redirect } from "next/navigation";
-
-import { prisma } from "@/lib/db";
 
 type Props = {};
 
