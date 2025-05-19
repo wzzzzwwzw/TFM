@@ -26,7 +26,7 @@ export async function POST(req: Request, res: Response) {
         topic,
       },
     });
-    await prisma.topic_count.upsert({
+    await prisma.topicCount.upsert({
       where: {
         topic,
       },
@@ -40,6 +40,7 @@ export async function POST(req: Request, res: Response) {
         },
       },
     });
+console.log("API_URL:", process.env.API_URL);
 
     const { data } = await axios.post(
       `${process.env.API_URL as string}/api/questions`,
@@ -70,7 +71,7 @@ export async function POST(req: Request, res: Response) {
         return {
           question: question.question,
           answer: question.answer,
-          options: JSON.stringify(options),
+          options,
           gameId: game.id,
           questionType: "mcq",
         };
@@ -157,7 +158,7 @@ export async function GET(req: Request, res: Response) {
     return NextResponse.json(
       { game },
       {
-        status: 400,
+        status: 200,
       }
     );
   } catch (error) {

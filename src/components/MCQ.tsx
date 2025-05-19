@@ -37,14 +37,16 @@ const MCQ = ({ game }: Props) => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
 
-  const options = React.useMemo(() => {
-    if (!currentQuestion) return [];
-    if (!currentQuestion.options) return [];
-    return JSON.parse(currentQuestion.options as string) as string[];
-  }, [currentQuestion]);
-
+ const options = React.useMemo(() => {
+  if (!currentQuestion) return [];
+  if (!currentQuestion.options) return [];
+  return currentQuestion.options as string[];
+}, [currentQuestion]);
   const { toast } = useToast();
-  const { mutate: checkAnswer, isLoading: isChecking } = useMutation({
+  const {
+    mutate: checkAnswer,
+    status: checkAnswerStatus,
+  } = useMutation({
     mutationFn: async () => {
       const payload: z.infer<typeof checkAnswerSchema> = {
         questionId: currentQuestion.id,
@@ -54,6 +56,7 @@ const MCQ = ({ game }: Props) => {
       return response.data;
     },
   });
+  const isChecking = checkAnswerStatus === "pending";
 
   const { mutate: endGame } = useMutation({
     mutationFn: async () => {
