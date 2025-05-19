@@ -22,13 +22,14 @@ const BlankAnswerInput = ({ answer, setBlankAnswer }: Props) => {
   }, [answer]);
 
   const answerWithBlanks = React.useMemo(() => {
-    const answerWithBlanks = keywords.reduce((acc, curr) => {
-      return acc.replaceAll(curr, blank);
-    }, answer);
-    setBlankAnswer(answerWithBlanks);
-    return answerWithBlanks;
-  }, [answer, keywords, setBlankAnswer]);
+  return keywords.reduce((acc, curr) => {
+    return acc.replaceAll(curr, blank);
+  }, answer);
+}, [answer, keywords]);
 
+React.useEffect(() => {
+  setBlankAnswer(answerWithBlanks);
+}, [answerWithBlanks, setBlankAnswer]);
   return (
     <div className="flex justify-start w-full mt-4">
       <h1 className="text-xl font-semibold">
