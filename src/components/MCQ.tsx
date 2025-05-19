@@ -32,16 +32,21 @@ const MCQ = ({ game }: Props) => {
   });
   const [selectedChoice, setSelectedChoice] = React.useState<number>(0);
   const [now, setNow] = React.useState(new Date());
+  const [mounted, setMounted] = React.useState(false); // Add this line
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentQuestion = React.useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
 
- const options = React.useMemo(() => {
-  if (!currentQuestion) return [];
-  if (!currentQuestion.options) return [];
-  return currentQuestion.options as string[];
-}, [currentQuestion]);
+  const options = React.useMemo(() => {
+    if (!currentQuestion) return [];
+    if (!currentQuestion.options) return [];
+    return currentQuestion.options as string[];
+  }, [currentQuestion]);
   const { toast } = useToast();
   const {
     mutate: checkAnswer,
@@ -140,7 +145,7 @@ const MCQ = ({ game }: Props) => {
       <div className="absolute flex flex-col justify-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
         <div className="px-4 py-2 mt-2 font-semibold text-white bg-green-500 rounded-md whitespace-nowrap">
           You Completed in{" "}
-          {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+          {mounted && formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
         </div>
         <Link
           href={`/statistics/${game.id}`}
@@ -164,10 +169,12 @@ const MCQ = ({ game }: Props) => {
               {game.topic}
             </span>
           </p>
-          <div className="flex self-start mt-3 text-slate-400">
-            <Timer className="mr-2" />
-            {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
-          </div>
+          {mounted && (
+            <div className="flex self-start mt-3 text-slate-400">
+              <Timer className="mr-2" />
+              {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+            </div>
+          )}
         </div>
         <MCQCounter
           correct_answers={stats.correct_answers}

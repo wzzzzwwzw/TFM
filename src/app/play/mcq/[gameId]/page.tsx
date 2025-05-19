@@ -10,7 +10,8 @@ type Props = {
   };
 };
 
-const MCQPage = async ({ params }: Props) => {
+const MCQPage = async ( props : Props) => {
+  const { params } = await props;
   const { gameId } = params;
 
   const session = await getAuthSession();
