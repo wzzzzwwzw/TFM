@@ -13,12 +13,20 @@ const Navbar = async () => {
       <div className="flex items-center justify-between h-full gap-2 px-8 mx-auto max-w-7xl">
         {/* Logo */}
         <Link href={"/"} className="flex items-center gap-2">
-          <p className="rounded-lg border-2 border-b-4 border-r-4 border-black px-2 py-1 text-xl font-bold transition-all hover:-translate-y-[2px] md:block dark:border-white">
+          <p className="rounded-lg border-4 border-blue-900 bg-blue-600 px-3 py-1 text-xl font-bold text-white hover:bg-blue-700 transition-all hover:-translate-y-1 md:block">
             Quizzzy
           </p>
         </Link>
         <div className="flex items-center">
           <ThemeToggle className="mr-4" />
+           {session?.user?.email === "waelwzwz@gmail.com" && (
+            <Link
+              href="/admin"
+              className="mr-4 px-3 py-1 rounded bg-blue-900 text-white font-semibold hover:bg-blue-700 transition"
+            >
+              Admin
+            </Link>
+          )}
           {session?.user ? (
             <UserAccountNav user={session.user} />
           ) : (

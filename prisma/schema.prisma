@@ -77,6 +77,23 @@ model Question {
 
   @@index([gameId], name: "gameId")
 }
+model Quiz {
+  id         Int           @id @default(autoincrement())
+  title      String
+  category   String
+  difficulty String
+  questions  QuizQuestion[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model QuizQuestion {
+  id        Int    @id @default(autoincrement())
+  quizId    Int
+  text      String
+  answer    String
+  Quiz      Quiz   @relation(fields: [quizId], references: [id])
+}
 
 model topicCount {
   id    String @id @default(cuid())
