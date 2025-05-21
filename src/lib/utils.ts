@@ -21,3 +21,28 @@ export function formatTimeDelta(seconds: number) {
   }
   return parts.join(" ");
 }
+export function normalize(str: string) {
+  return str
+    .toLowerCase()
+    .replace(/[^\w\s]|_/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function similarity(a: string, b: string) {
+  a = normalize(a);
+  b = normalize(b);
+
+  if (!a.length && !b.length) return 1;
+  if (!a.length || !b.length) return 0;
+
+  let longer = a.length > b.length ? a : b;
+  let shorter = a.length > b.length ? b : a;
+  let longerLength = longer.length;
+
+  let same = 0;
+  for (let i = 0; i < shorter.length; i++) {
+    if (shorter[i] === longer[i]) same++;
+  }
+  return same / longerLength;
+}
