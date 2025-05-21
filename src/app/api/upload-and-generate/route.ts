@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
   if (file.type === "application/json" || file.name.endsWith(".json")) {
     try {
       const jsonData = JSON.parse(text);
-      // Try to extract course content from common fields
-      courseContent = jsonData.content || jsonData.text || "";
+      // Try to extract course content from common fields, or fallback to the whole JSON string
+      courseContent = jsonData.content || jsonData.text || JSON.stringify(jsonData) || "";
       if (!courseContent) {
         return NextResponse.json({ error: "No course content found in JSON." }, { status: 400 });
       }
@@ -43,11 +43,17 @@ export async function POST(req: NextRequest) {
     // Plain text file
     courseContent = text;
   }
+
+  // Validate course content length
+  if (!courseContent || courseContent.trim().length < 10) {
+    return NextResponse.json({ error: "Course content is too short or missing." }, { status: 400 });
+  }
+
   console.log("File name:", file.name);
   console.log("Course content sent to OpenAI:", courseContent);
 
   // Use OpenAI to generate questions and answers from the course content
- const system_prompt = `
+  const system_prompt = `
 You are a quiz generator. Given the following course content, generate exactly 5 questions and answers.
 Course content:
 ${courseContent}
@@ -67,16 +73,16 @@ If you cannot generate a question or answer, use an empty string for that field.
 
   try {
     let questions = await strict_output(
-  system_prompt,
-  "", // <--- user prompt is empty, all info is in system prompt
-  output_format,
-  "",
-  false,
-  "gpt-3.5-turbo",
-  0,
-  3,
-  false
-);
+      system_prompt,
+      "", // <--- user prompt is empty, all info is in system prompt
+      output_format,
+      "",
+      false,
+      "gpt-3.5-turbo",
+      0,
+      3,
+      false
+    );
     if (!Array.isArray(questions)) questions = [questions];
     return NextResponse.json({ questions });
   } catch (e) {
