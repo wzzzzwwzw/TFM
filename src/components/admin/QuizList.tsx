@@ -25,14 +25,36 @@ export default function QuizList() {
       .finally(() => setLoading(false));
   }, [category, difficulty]);
 
+  // Placeholder handlers for actions
+  const handleView = (quiz: any) => {
+    alert(`View quiz: ${quiz.title}`);
+  };
+  const handleEdit = (quiz: any) => {
+    alert(`Edit quiz: ${quiz.title}`);
+  };
+  const handleDelete = (quiz: any) => {
+    if (window.confirm(`Are you sure you want to delete "${quiz.title}"?`)) {
+      // Implement delete logic here
+      setQuizzes(qs => qs.filter(q => q.id !== quiz.id));
+    }
+  };
+
   return (
-    <div>
-      <div className="mb-4 flex gap-2">
-        <select value={category} onChange={e => setCategory(e.target.value)}>
+    <div className="p-4 bg-white rounded-xl shadow border">
+      <div className="mb-4 flex gap-4 items-center">
+        <select
+          className="border rounded px-2 py-1"
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+        >
           <option value="">All Categories</option>
           {categories.map(cat => <option key={cat}>{cat}</option>)}
         </select>
-        <select value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+        <select
+          className="border rounded px-2 py-1"
+          value={difficulty}
+          onChange={e => setDifficulty(e.target.value)}
+        >
           <option value="">All Difficulties</option>
           {difficulties.map(diff => <option key={diff}>{diff}</option>)}
         </select>
@@ -40,16 +62,57 @@ export default function QuizList() {
       {loading && <div>Loading quizzes...</div>}
       {error && <div className="text-red-500">{error}</div>}
       {!loading && quizzes.length === 0 && <div>No quizzes found.</div>}
-      <ul>
-        {quizzes.map((quiz: any) => (
-          <li key={quiz.id} className="mb-2">
-            <strong>{quiz.title}</strong> - {quiz.category} - {quiz.difficulty}
-            {quiz.questions && Array.isArray(quiz.questions) && (
-              <span> ({quiz.questions.length} questions)</span>
-            )}
-          </li>
-        ))}
-      </ul>
+      {!loading && quizzes.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border rounded-lg">
+            <thead>
+              <tr className="bg-blue-100">
+                <th className="p-2 border">#</th>
+                <th className="p-2 border text-left">Title</th>
+                <th className="p-2 border text-left">Category</th>
+                <th className="p-2 border text-left">Difficulty</th>
+                <th className="p-2 border text-center">Questions</th>
+                <th className="p-2 border text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quizzes.map((quiz: any, idx: number) => (
+                <tr key={quiz.id} className="hover:bg-blue-50">
+                  <td className="p-2 border text-center">{idx + 1}</td>
+                  <td className="p-2 border">{quiz.title}</td>
+                  <td className="p-2 border">{quiz.category}</td>
+                  <td className="p-2 border">{quiz.difficulty}</td>
+                  <td className="p-2 border text-center">
+                    {quiz.questions && Array.isArray(quiz.questions)
+                      ? quiz.questions.length
+                      : 0}
+                  </td>
+                  <td className="p-2 border text-center space-x-2">
+                    <button
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                      onClick={() => handleView(quiz)}
+                    >
+                      View
+                    </button>
+                    <button
+                      className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                      onClick={() => handleEdit(quiz)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      onClick={() => handleDelete(quiz)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

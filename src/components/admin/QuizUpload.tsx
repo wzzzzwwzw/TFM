@@ -14,7 +14,6 @@ const QuizUpload = ({ onQuizReady }: QuizUploadProps) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const selectedFile = event.target.files[0];
-      // Accept .json or .txt files
       if (
         selectedFile.type !== "application/json" &&
         selectedFile.type !== "text/plain" &&
@@ -29,6 +28,25 @@ const QuizUpload = ({ onQuizReady }: QuizUploadProps) => {
       setError(null);
     } else {
       setFile(null);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      const droppedFile = event.dataTransfer.files[0];
+      if (
+        droppedFile.type !== "application/json" &&
+        droppedFile.type !== "text/plain" &&
+        !droppedFile.name.endsWith(".json") &&
+        !droppedFile.name.endsWith(".txt")
+      ) {
+        setError("Only JSON or TXT files are accepted.");
+        setFile(null);
+        return;
+      }
+      setFile(droppedFile);
+      setError(null);
     }
   };
 
@@ -66,18 +84,41 @@ const QuizUpload = ({ onQuizReady }: QuizUploadProps) => {
   };
 
   return (
-    <div>
-      <input
-        type="file"
-        accept=".json,.txt"
-        onChange={handleFileChange}
-        ref={fileInputRef}
-        style={{ display: "none" }}
-      />
-      <button onClick={handleButtonClick} className="bg-blue-500 text-white px-4 py-2 rounded">
-        Select File
-      </button>
-      <button onClick={handleUpload} disabled={uploading || !file} className="ml-2 bg-green-500 text-white px-4 py-2 rounded">
+    <div className="flex flex-col items-center gap-4">
+      <div
+        className={`w-full max-w-md border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center transition-colors
+          ${file ? "border-green-400 bg-green-50" : "border-blue-400 bg-blue-50 hover:bg-blue-100"}
+          ${error ? "border-red-400 bg-red-50" : ""}
+        `}
+        onClick={handleButtonClick}
+        onDrop={handleDrop}
+        onDragOver={e => e.preventDefault()}
+        style={{ cursor: "pointer" }}
+      >
+        <input
+          type="file"
+          accept=".json,.txt"
+          onChange={handleFileChange}
+          ref={fileInputRef}
+          style={{ display: "none" }}
+        />
+        <span className="text-4xl mb-2 text-blue-400">📁</span>
+        <span className="font-semibold text-blue-700">
+          {file ? file.name : "Drag & drop or click to select a JSON/TXT file"}
+        </span>
+        <span className="text-xs text-gray-500 mt-1">
+          Only .json or .txt files are accepted.
+        </span>
+      </div>
+      <button
+        onClick={handleUpload}
+        disabled={uploading || !file}
+        className={`w-full max-w-md py-2 rounded-lg font-bold transition-colors
+          ${uploading || !file
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600"}
+        `}
+      >
         {uploading ? "Uploading..." : "Upload & Generate"}
       </button>
       {error && <p className="text-red-500 mt-2">{error}</p>}
