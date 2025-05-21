@@ -1,14 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Dummy in-memory store for demonstration
-let quizzes: any[] = [];
+import { prisma } from "@/lib/db"; // Adjust the import path if needed
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  // Save quiz (replace with DB logic)
-  const quiz = { id: Date.now(), ...body, approved: true };
-  quizzes.push(quiz);
-  return NextResponse.json({ quiz }, { status: 201 });
+  try {
+    const body = await req.json();
+    const { title, category, difficulty, questions } = body;
+
+    const quiz = await prisma.adminQuiz.create({
+      data: {
+        title,
+        category,
+        difficulty,
+        status: "approved", // or "pending" if you want to review later
+        questions: {
+          create: questions.map((q: any) => ({
+            question: q.question,
+            answer: q.answer,
+          })),
+        },
+      },
+      include: { questions: true },
+    });
+
+    return NextResponse.json({ quiz }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to save quiz", details: error }, { status: 500 });
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -16,9 +33,14 @@ export async function GET(req: NextRequest) {
   const category = searchParams.get("category");
   const difficulty = searchParams.get("difficulty");
 
-  let filtered = quizzes;
-  if (category) filtered = filtered.filter(q => q.category === category);
-  if (difficulty) filtered = filtered.filter(q => q.difficulty === difficulty);
+  const where: any = {};
+  if (category) where.category = category;
+  if (difficulty) where.difficulty = difficulty;
 
-  return NextResponse.json({ quizzes: filtered });
+  const quizzes = await prisma.adminQuiz.findMany({
+    where,
+    include: { questions: true },
+  });
+
+  return NextResponse.json({ quizzes });
 }

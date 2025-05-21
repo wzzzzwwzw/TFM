@@ -100,3 +100,33 @@ model topicCount {
   topic String @unique
   count Int
 }
+
+model AdminQuiz {
+  id          String           @id @default(uuid())
+  title       String
+  category    String
+  difficulty  String
+  status      String           @default("pending") // e.g. "pending", "approved", "rejected"
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  questions   AdminQuizQuestion[]
+}
+
+model AdminQuizQuestion {
+  id        String   @id @default(uuid())
+  quizId    String
+  quiz      AdminQuiz @relation(fields: [quizId], references: [id])
+  question  String
+  answer    String
+  // Optionally: type, options, etc.
+}
+
+model UserQuizAttempt {
+  id         String   @id @default(uuid())
+  userId     String
+  quizId     String
+  quizTitle  String
+  answers    Json
+  score      Float
+  createdAt  DateTime @default(now())
+}

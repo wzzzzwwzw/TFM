@@ -1,7 +1,7 @@
 import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
-const ADMIN_EMAIL = "waelwzwz@gmail.com"; // Change to your admin email
+const ADMIN_EMAIL = "waelwzwz@gmail.com"; 
 
 const AdminPage = async () => {
   const session = await getAuthSession();

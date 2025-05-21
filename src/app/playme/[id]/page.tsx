@@ -1,7 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { similarity } from "@/lib/utils"; // <-- Import similarity
+import { similarity } from "@/lib/utils";
 
 type Question = {
   question: string;
@@ -49,6 +49,57 @@ export default function QuizPage() {
       .finally(() => setLoading(false));
   }, [quizId]);
 
+  // Save the user's quiz attempt to the database
+  async function saveQuizAttempt() {
+    // Get the user session (adjust if you use a different auth system)
+    const session = await fetch("/api/auth/session").then(res => res.json());
+    if (!session?.user?.id) return;
+
+    // Calculate score
+    const correctCount = quiz!.questions.reduce(
+      (acc, q, i) => acc + (isAnswerCorrect(userAnswers[i], q.answer) ? 1 : 0),
+      0
+    );
+    const score = (correctCount / quiz!.questions.length) * 100;
+
+    await fetch("/api/user-quiz-stats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: session.user.id,
+        quizId: quiz!.id,
+        quizTitle: quiz!.title,
+        answers: userAnswers,
+        score,
+      }),
+    });
+  }
+
+  const handleInput = (val: string) => {
+    setUserAnswers(prev => {
+      const copy = [...prev];
+      copy[current] = val;
+      return copy;
+    });
+  };
+
+  const handleNext = async () => {
+    if (current === quiz!.questions.length - 1) {
+      setShowFinish(true);
+      await saveQuizAttempt();
+    } else {
+      setCurrent((prev) => Math.min(prev + 1, quiz!.questions.length - 1));
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrent((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleGoHome = () => {
+    router.push("/home");
+  };
+
   if (loading) {
     return (
       <main className="p-8 mx-auto max-w-3xl">
@@ -70,30 +121,6 @@ export default function QuizPage() {
   }
 
   const question = quiz.questions[current];
-
-  const handleInput = (val: string) => {
-    setUserAnswers(prev => {
-      const copy = [...prev];
-      copy[current] = val;
-      return copy;
-    });
-  };
-
-  const handleNext = () => {
-    if (current === quiz.questions.length - 1) {
-      setShowFinish(true);
-    } else {
-      setCurrent((prev) => Math.min(prev + 1, quiz.questions.length - 1));
-    }
-  };
-
-  const handlePrev = () => {
-    setCurrent((prev) => Math.max(prev - 1, 0));
-  };
-
-  const handleGoHome = () => {
-    router.push("/home");
-  };
 
   return (
     <main className="p-8 mx-auto max-w-3xl">

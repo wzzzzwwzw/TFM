@@ -1,6 +1,12 @@
 import UserQuizStats from "@/components/UserQuizStats";
+import { getAuthSession } from "@/lib/nextauth";
+import { redirect } from "next/navigation";
 
-export default function MyStatsPage() {
+export default async function MyStatsPage() {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    redirect("/");
+  }
   return (
     <main className="p-8 max-w-4xl mx-auto">
       <UserQuizStats />
