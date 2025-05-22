@@ -43,14 +43,15 @@ const UserAccountNav = ({ user }: Props) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/">settings</Link>
+          <Link href="/">Settings</Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
         <DropdownMenuItem
-          onSelect={(event) => {
+          onSelect={async (event) => {
             event.preventDefault();
+            await fetch("/api/signout");
             signOut().catch(console.error);
           }}
           className="text-red-600 cursor-pointer"

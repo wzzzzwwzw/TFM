@@ -43,6 +43,10 @@ export const authOptions: NextAuthOptions = {
       });
       if (db_user) {
         token.id = db_user.id;
+        await prisma.user.update({
+        where: { id: db_user.id },
+        data: { isOnline: true },
+    });
       }
       return token;
     },

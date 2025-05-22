@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from "react";
 
 type QuizStatistic = {
-  id: string | number;
-  title: string;
+  quizId: string;
+  quizTitle: string;
   attempts: number;
   averageScore: number;
-  completionRate: number;
+  completionRate?: number; // Optional
 };
 
 const QuizStatistics = () => {
@@ -35,16 +35,28 @@ const QuizStatistics = () => {
             <th className="border border-gray-300 px-4 py-2">Quiz Title</th>
             <th className="border border-gray-300 px-4 py-2">Attempts</th>
             <th className="border border-gray-300 px-4 py-2">Average Score</th>
-            <th className="border border-gray-300 px-4 py-2">Completion Rate</th>
+            <th className="border border-gray-300 px-4 py-2">
+              Completion Rate
+            </th>
           </tr>
         </thead>
         <tbody>
           {statistics.map((stat) => (
-            <tr key={stat.id}>
-              <td className="border border-gray-300 px-4 py-2">{stat.title}</td>
-              <td className="border border-gray-300 px-4 py-2">{stat.attempts}</td>
-              <td className="border border-gray-300 px-4 py-2">{stat.averageScore}</td>
-              <td className="border border-gray-300 px-4 py-2">{stat.completionRate}%</td>
+            <tr key={`${stat.quizId}-${stat.quizTitle}`}>
+              <td className="border border-gray-300 px-4 py-2">
+                {stat.quizTitle}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {stat.attempts}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {stat.averageScore}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {stat.completionRate !== undefined
+                  ? `${stat.completionRate}%`
+                  : "N/A"}
+              </td>
             </tr>
           ))}
         </tbody>

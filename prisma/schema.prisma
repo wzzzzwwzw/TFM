@@ -42,6 +42,8 @@ model User {
   accounts Account[]
   sessions Session[]
   games         Game[] 
+  banned        Boolean   @default(false) // <-- Add this
+  isOnline      Boolean   @default(false) // <-- Add this
 }
 
 enum GameType{
