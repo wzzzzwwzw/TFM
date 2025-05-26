@@ -48,10 +48,7 @@ const MCQ = ({ game }: Props) => {
     return currentQuestion.options as string[];
   }, [currentQuestion]);
   const { toast } = useToast();
-  const {
-    mutate: checkAnswer,
-    status: checkAnswerStatus,
-  } = useMutation({
+  const { mutate: checkAnswer, status: checkAnswerStatus } = useMutation({
     mutationFn: async () => {
       const payload: z.infer<typeof checkAnswerSchema> = {
         questionId: currentQuestion.id,
@@ -145,7 +142,8 @@ const MCQ = ({ game }: Props) => {
       <div className="absolute flex flex-col justify-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
         <div className="px-4 py-2 mt-2 font-semibold text-white bg-green-500 rounded-md whitespace-nowrap">
           You Completed in{" "}
-          {mounted && formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+          {mounted &&
+            formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
         </div>
         <Link
           href={`/statistics/${game.id}`}
@@ -198,7 +196,7 @@ const MCQ = ({ game }: Props) => {
         {options.map((option, index) => {
           return (
             <Button
-              key={option}
+              key={`${currentQuestion.id}-${index}`}
               variant={selectedChoice === index ? "default" : "outline"}
               className="justify-start w-full py-8 mb-4"
               onClick={() => setSelectedChoice(index)}
@@ -212,6 +210,7 @@ const MCQ = ({ game }: Props) => {
             </Button>
           );
         })}
+
         <Button
           variant="default"
           className="mt-2"

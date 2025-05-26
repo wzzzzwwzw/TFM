@@ -12,20 +12,15 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      isAdmin?: boolean; // <--- Add this
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    isAdmin?: boolean; // <--- Add this
   }
 }
 
@@ -43,16 +38,36 @@ export const authOptions: NextAuthOptions = {
       });
       if (db_user) {
         token.id = db_user.id;
-        await prisma.user.update({
-        where: { id: db_user.id },
-        data: { isOnline: true },
-    });
+        token.isAdmin = db_user.isAdmin; // <--- Add this
+        // Add retry logic for lock wait timeout
+        let retries = 3;
+        while (retries > 0) {
+          try {
+            await prisma.user.update({
+              where: { id: db_user.id },
+              data: { isOnline: true },
+            });
+            break; // success, exit loop
+          } catch (err: any) {
+            if (
+              retries > 1 &&
+              (err.code === 'P2034' ||
+                (err.message && err.message.includes('Lock wait timeout')))
+            ) {
+              await new Promise((res) => setTimeout(res, 500));
+              retries--;
+            } else {
+              throw err;
+            }
+          }
+        }
       }
       return token;
     },
     session: ({ session, token }) => {
       if (token) {
         session.user.id = token.id;
+        session.user.isAdmin = token.isAdmin; // <--- Add this
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
