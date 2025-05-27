@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import React from "react";
+import { cookies } from "next/headers";
 
 type Props = {
   params: {
@@ -11,12 +12,14 @@ type Props = {
 };
 
 const MCQPage = async ( props : Props) => {
-  const { params } = await props;
+  const { params } = props;
   const { gameId } = params;
 
   const session = await getAuthSession();
-  if (!session?.user) {
-    return redirect("/");
+  const cookieStore = await cookies();
+  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
+  if (!session?.user && !isAdmin) {
+    redirect("/");
   }
 
   const game = await prisma.game.findUnique({
@@ -24,7 +27,7 @@ const MCQPage = async ( props : Props) => {
       id: gameId,
     },
     include: {
-      questions: {
+      questions: { 
         select: {
           id: true,
           question: true,

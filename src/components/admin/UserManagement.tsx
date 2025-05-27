@@ -75,31 +75,34 @@ const UserManagement = () => {
         <table className="w-full min-w-full">
           <thead>
             <tr>
-              <th className="py-2 text-left">Email</th>
-              <th className="py-2 text-left">Online Status</th>
-              <th className="py-2 text-left">Banned</th>
-              <th className="py-2 text-left">Actions</th>
+              <th className="py-3 px-4 text-left">Email</th>
+              <th className="py-3 px-4 text-left">Online Status</th>
+              <th className="py-3 px-4 text-left">Banned</th>
+              <th className="py-3 px-4 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} className={user.banned ? "bg-red-100" : ""}>
-                <td className="py-2">{user.email}</td>
-                <td className="py-2">
+              <tr
+                key={user.id}
+                className={`${user.banned ? "bg-red-100" : ""} border-b last:border-b-0`}
+              >
+                <td className="py-4 px-4">{user.email}</td>
+                <td className="py-4 px-4">
                   {isUserOnline(user.lastSeen) ? (
                     <span className="text-green-600 font-bold">Online</span>
                   ) : (
                     <span className="text-gray-500">Offline</span>
                   )}
                 </td>
-                <td className="py-2">
+                <td className="py-4 px-4">
                   {user.banned ? (
                     <span className="text-red-600 font-bold">Banned</span>
                   ) : (
                     <span className="text-green-600">Active</span>
                   )}
                 </td>
-                <td className="py-2 space-x-2">
+                <td className="py-4 px-4 space-x-2">
                   <button
                     onClick={() => handleRevokeUser(user.id)}
                     className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"

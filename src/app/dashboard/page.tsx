@@ -6,6 +6,7 @@ import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import React from "react";
 import RecentActivityCard from "@/components/dashboard/RecentActivityCard";
+import { cookies } from "next/headers";
 
 type Props = {};
 
@@ -16,7 +17,9 @@ export const metadata = {
 
 const Dasboard = async (props: Props) => {
   const session = await getAuthSession();
-  if (!session?.user) {
+ const cookieStore = await cookies();
+  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
+  if (!session?.user && !isAdmin) {
     redirect("/");
   }
 

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/nextauth";
 import { LucideLayoutDashboard } from "lucide-react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 import { redirect } from "next/navigation";
 import React from "react";
@@ -19,8 +20,10 @@ type Props = {
 
 const Statistics = async ({ params: { gameId } }: Props) => {
   const session = await getAuthSession();
-  if (!session?.user) {
-    return redirect("/");
+  const cookieStore = await cookies();
+  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
+  if (!session?.user && !isAdmin) {
+    redirect("/");
   }
   const game = await prisma.game.findUnique({
     where: { id: gameId },

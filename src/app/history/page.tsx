@@ -6,14 +6,17 @@ import React from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { LucideLayoutDashboard } from "lucide-react";
+import { cookies } from "next/headers";
 
 type Props = {};
 
 const History = async (props: Props) => {
   const session = await getAuthSession();
-  if (!session?.user) {
-    return redirect("/");
-  }
+ const cookieStore = await cookies();
+   const isAdmin = cookieStore.get("admin_auth")?.value === "1";
+   if (!session?.user && !isAdmin) {
+     redirect("/");
+   }
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 w-[400px]">
       <Card>
@@ -27,7 +30,9 @@ const History = async (props: Props) => {
           </div>
         </CardHeader>
         <CardContent className="max-h-[60vh] overflow-scroll">
-          <HistoryComponent limit={100} userId={session.user.id} />
+          {session?.user && (
+            <HistoryComponent limit={100} userId={session.user.id} />
+          )}
         </CardContent>
       </Card>
     </div>

@@ -51,7 +51,7 @@ const UserAccountNav = ({ user }: Props) => {
         <DropdownMenuItem
           onSelect={async (event) => {
             event.preventDefault();
-            await fetch("/api/signout");
+            await fetch("/api/sign-out");
             signOut().catch(console.error);
           }}
           className="text-red-600 cursor-pointer"

@@ -9,7 +9,7 @@ const SignInButton = ({ text }: Props) => {
   return (
     <Button
       onClick={() => {
-        signIn("google").catch(console.error);
+        signIn("google", { prompt: "select_account" }).catch(console.error);
       }}
     >
       {text}
