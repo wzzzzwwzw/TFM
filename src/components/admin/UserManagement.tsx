@@ -106,17 +106,25 @@ const UserManagement = () => {
                   <button
                     onClick={() => handleRevokeUser(user.id)}
                     className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                    disabled={user.banned}
+                    disabled={!user.banned}
                   >
                     Revoke
                   </button>
-                  <button
-                    onClick={() => handleBanUser(user.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    disabled={user.banned}
-                  >
-                    Ban
-                  </button>
+                  {user.banned ? (
+                    <button
+                      onClick={() => handleRevokeUser(user.id)}
+                      className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                    >
+                      Unban
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleBanUser(user.id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    >
+                      Ban
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

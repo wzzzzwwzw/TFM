@@ -13,6 +13,7 @@ declare module "next-auth" {
     user: {
       id: string;
       isAdmin?: boolean; // <--- Add this
+      banned?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -21,6 +22,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     isAdmin?: boolean; // <--- Add this
+    banned?: boolean; 
   }
 }
 
@@ -38,7 +40,8 @@ export const authOptions: NextAuthOptions = {
       });
       if (db_user) {
         token.id = db_user.id;
-        token.isAdmin = db_user.isAdmin; // <--- Add this
+        token.isAdmin = db_user.isAdmin;
+        token.banned = db_user.banned; // <--- Add this
         // Add retry logic for lock wait timeout
         let retries = 3;
         while (retries > 0) {
@@ -67,7 +70,8 @@ export const authOptions: NextAuthOptions = {
     session: ({ session, token }) => {
       if (token) {
         session.user.id = token.id;
-        session.user.isAdmin = token.isAdmin; // <--- Add this
+        session.user.isAdmin = token.isAdmin; 
+        session.user.banned = token.banned;// <--- Add this
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
