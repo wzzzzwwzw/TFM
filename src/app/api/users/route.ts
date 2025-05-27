@@ -1,14 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { cookies } from "next/headers";
 
 export async function GET() {
-  // You need to track online status in your user model or session table
+  const cookieStore = await cookies();
+  if (cookieStore.get("admin_auth")?.value !== "1") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const users = await prisma.user.findMany({
     select: {
       id: true,
       email: true,
-      isOnline: true, // Make sure this field exists in your user model
-      banned: true,   // Optional: add a banned field
+      lastSeen: true,
+      banned: true,
     },
   });
   return NextResponse.json(users);

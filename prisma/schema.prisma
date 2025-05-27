@@ -45,6 +45,8 @@ model User {
   banned        Boolean   @default(false) // <-- Add this
   isOnline      Boolean   @default(false) // <-- Add this
   isAdmin   Boolean  @default(false)
+  lastSeen  DateTime @default(now()) @updatedAt
+
 }
 
 enum GameType{

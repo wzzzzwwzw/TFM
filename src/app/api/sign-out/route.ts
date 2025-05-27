@@ -5,12 +5,19 @@ import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  console.log("SIGNOUT SESSION:", session);
   if (session?.user?.email) {
     await prisma.user.update({
       where: { email: session.user.email },
       data: { isOnline: false },
     });
   }
-  return NextResponse.json({ success: true });
+  // Clear the admin_auth cookie as well
+  return NextResponse.json(
+    { success: true },
+    {
+      headers: {
+        "Set-Cookie": `admin_auth=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax`,
+      },
+    }
+  );
 }

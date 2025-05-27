@@ -5,18 +5,31 @@ type User = {
   id: string;
   name?: string | null;
   email: string;
-  isOnline: boolean;
+  lastSeen?: string;
   banned?: boolean;
 };
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchUsers = async () => {
-    const response = await fetch("/api/users");
-    const data = await response.json();
-    setUsers(data);
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/users");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setUsers([]);
+        setError(data.error || "Failed to load users");
+      }
+    } catch (err) {
+      setUsers([]);
+      setError("Failed to load users");
+    }
     setLoading(false);
   };
 
@@ -37,8 +50,16 @@ const UserManagement = () => {
     fetchUsers();
   };
 
+  const isUserOnline = (lastSeen?: string) => {
+    if (!lastSeen) return false;
+    return new Date().getTime() - new Date(lastSeen).getTime() < 2 * 60 * 1000;
+  };
+
   if (loading) {
     return <div>Loading users...</div>;
+  }
+  if (error) {
+    return <div className="text-red-600">{error}</div>;
   }
 
   return (
@@ -54,7 +75,6 @@ const UserManagement = () => {
         <table className="w-full min-w-full">
           <thead>
             <tr>
-              <th className="py-2 text-left">Name</th>
               <th className="py-2 text-left">Email</th>
               <th className="py-2 text-left">Online Status</th>
               <th className="py-2 text-left">Banned</th>
@@ -64,14 +84,9 @@ const UserManagement = () => {
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className={user.banned ? "bg-red-100" : ""}>
-                <td className="py-2">
-                  {user.name || (
-                    <span className="italic text-gray-400">No name</span>
-                  )}
-                </td>
                 <td className="py-2">{user.email}</td>
                 <td className="py-2">
-                  {user.isOnline ? (
+                  {isUserOnline(user.lastSeen) ? (
                     <span className="text-green-600 font-bold">Online</span>
                   ) : (
                     <span className="text-gray-500">Offline</span>
