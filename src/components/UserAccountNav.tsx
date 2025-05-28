@@ -13,6 +13,7 @@ import UserAvatar from "./UserAvatar";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import DetailsDialog from "./DialogDetails";
 
 type Props = {
   user: Pick<User, "name" | "image" | "email">;
@@ -43,7 +44,7 @@ const UserAccountNav = ({ user }: Props) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/">Settings</Link>
+          <DetailsDialog />
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
