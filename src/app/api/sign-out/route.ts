@@ -11,13 +11,5 @@ export async function GET(req: NextRequest) {
       data: { isOnline: false },
     });
   }
-  // Clear the admin_auth cookie as well
-  return NextResponse.json(
-    { success: true },
-    {
-      headers: {
-        "Set-Cookie": `admin_auth=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax`,
-      },
-    }
-  );
+  return NextResponse.json({ success: true });
 }

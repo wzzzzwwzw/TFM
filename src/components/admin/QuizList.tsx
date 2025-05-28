@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-const categories = ["Math", "Science", "History"];
+const categories = ["Math", "Science", "History", "Programming"];
 const difficulties = ["easy", "medium", "hard"];
 
 export default function QuizList() {
@@ -32,10 +32,21 @@ export default function QuizList() {
   const handleEdit = (quiz: any) => {
     alert(`Edit quiz: ${quiz.title}`);
   };
-  const handleDelete = (quiz: any) => {
+  const handleDelete = async (quiz: any) => {
     if (window.confirm(`Are you sure you want to delete "${quiz.title}"?`)) {
-      // Implement delete logic here
-      setQuizzes(qs => qs.filter(q => q.id !== quiz.id));
+      try {
+        const res = await fetch(`/api/quiz-review?id=${quiz.id}`, {
+          method: "DELETE",
+        });
+        if (res.ok) {
+          setQuizzes(qs => qs.filter(q => q.id !== quiz.id));
+        } else {
+          const data = await res.json();
+          alert(data.error || "Failed to delete quiz.");
+        }
+      } catch {
+        alert("Failed to delete quiz.");
+      }
     }
   };
 

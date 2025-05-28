@@ -1,12 +1,11 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
+import { getAuthSession } from "@/lib/nextauth";
 
 const AdminPage = async () => {
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
-  if (!isAdmin) {
-    redirect("/admin/login");
+  const session = await getAuthSession();
+  if (!session?.user?.isAdmin) {
+    redirect("/"); 
   }
   return <AdminDashboardClient />;
 };

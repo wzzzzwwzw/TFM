@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-const categories = ["Math", "Science", "History"];
+const categories = ["Math", "Science", "History", "Programming"];
 const difficulties = ["easy", "medium", "hard"];
 
 export default function QuizReview({
@@ -12,6 +12,7 @@ export default function QuizReview({
   onApprove: (quiz: any) => void;
 }) {
   const [editedQuiz, setEditedQuiz] = useState(quiz);
+  const [title, setTitle] = useState(quiz.title || "");
   const [category, setCategory] = useState(categories[0]);
   const [difficulty, setDifficulty] = useState(difficulties[0]);
   const [editIdx, setEditIdx] = useState<number | null>(null);
@@ -47,8 +48,17 @@ export default function QuizReview({
 
   return (
     <div className="p-6 border rounded-xl bg-white shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Review Quiz: {editedQuiz.title}</h2>
-      <div className="flex gap-4 mb-4">
+      <h2 className="text-2xl font-bold mb-4">Review Quiz</h2>
+      <div className="flex gap-4 mb-4 items-center">
+        <div>
+          <label className="font-semibold mr-2">Title:</label>
+          <input
+            className="border rounded px-2 py-1"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Enter quiz title"
+          />
+        </div>
         <div>
           <label className="font-semibold mr-2">Category:</label>
           <select
@@ -157,7 +167,14 @@ export default function QuizReview({
       </div>
       <button
         className="mt-6 bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
-        onClick={() => onApprove({ ...editedQuiz, category, difficulty })}
+        onClick={() =>
+          onApprove({
+            ...editedQuiz,
+            title: title.trim(), // <-- send only if user entered
+            category,
+            difficulty,
+          })
+        }
       >
         Approve & Save
       </button>

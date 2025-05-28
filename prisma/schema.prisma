@@ -120,7 +120,7 @@ model AdminQuiz {
 model AdminQuizQuestion {
   id        String   @id @default(uuid())
   quizId    String
-  quiz      AdminQuiz @relation(fields: [quizId], references: [id])
+  quiz      AdminQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
   question  String
   answer    String
   // Optionally: type, options, etc.

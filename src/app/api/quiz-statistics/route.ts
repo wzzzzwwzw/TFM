@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from "@/lib/db";
-
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/nextauth";
 export async function GET() {
+   const session = await getServerSession(authOptions);
+  if (!session?.user?.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   // Group attempts by quizTitle
   const attempts = await prisma.userQuizAttempt.findMany();
 
