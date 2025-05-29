@@ -7,6 +7,7 @@ type User = {
   email: string;
   lastSeen?: string;
   banned?: boolean;
+  revoked?: boolean;
 };
 
 const UserManagement = () => {
@@ -35,9 +36,6 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
-    // Optional: Poll every 5 seconds for real-time updates
-    // const interval = setInterval(fetchUsers, 5000);
-    // return () => clearInterval(interval);
   }, []);
 
   const handleBanUser = async (userId: string) => {
@@ -45,8 +43,18 @@ const UserManagement = () => {
     fetchUsers();
   };
 
+  const handleUnbanUser = async (userId: string) => {
+    await fetch(`/api/users/${userId}/unban`, { method: "POST" });
+    fetchUsers();
+  };
+
   const handleRevokeUser = async (userId: string) => {
     await fetch(`/api/users/${userId}/revoke`, { method: "POST" });
+    fetchUsers();
+  };
+
+  const handleUnrevokeUser = async (userId: string) => {
+    await fetch(`/api/users/${userId}/unrevoke`, { method: "POST" });
     fetchUsers();
   };
 
@@ -78,6 +86,7 @@ const UserManagement = () => {
               <th className="py-3 px-4 text-left">Email</th>
               <th className="py-3 px-4 text-left">Online Status</th>
               <th className="py-3 px-4 text-left">Banned</th>
+              <th className="py-3 px-4 text-left">Revoked</th>
               <th className="py-3 px-4 text-left">Actions</th>
             </tr>
           </thead>
@@ -102,17 +111,32 @@ const UserManagement = () => {
                     <span className="text-green-600">Active</span>
                   )}
                 </td>
+                <td className="py-4 px-4">
+                  {user.revoked ? (
+                    <span className="text-yellow-600 font-bold">Revoked</span>
+                  ) : (
+                    <span className="text-green-600">Allowed</span>
+                  )}
+                </td>
                 <td className="py-4 px-4 space-x-2">
-                  <button
-                    onClick={() => handleRevokeUser(user.id)}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                    disabled={!user.banned}
-                  >
-                    Revoke
-                  </button>
-                  {user.banned ? (
+                  {user.revoked ? (
+                    <button
+                      onClick={() => handleUnrevokeUser(user.id)}
+                      className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                    >
+                      Unrevoke
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handleRevokeUser(user.id)}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                    >
+                      Revoke
+                    </button>
+                  )}
+                  {user.banned ? (
+                    <button
+                      onClick={() => handleUnbanUser(user.id)}
                       className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
                     >
                       Unban

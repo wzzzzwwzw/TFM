@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/nextauth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_auth")?.value !== "1") {
+  const { params } = context;
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
     await prisma.user.update({
       where: { id: params.userId },
-      data: { banned: false },
+      data: { revoked: true },
     });
     return NextResponse.json({ success: true });
   } catch {

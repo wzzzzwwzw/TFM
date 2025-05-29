@@ -43,6 +43,7 @@ model User {
   sessions Session[]
   games         Game[] 
   banned        Boolean   @default(false) // <-- Add this
+  revoked  Boolean  @default(false) 
   isOnline      Boolean   @default(false) // <-- Add this
   isAdmin   Boolean  @default(false)
   lastSeen  DateTime @default(now()) @updatedAt
