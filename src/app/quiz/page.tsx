@@ -3,9 +3,8 @@ import React from "react";
 import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import QuizCreation from "@/components/forms/QuizCreation";
-import { cookies } from "next/headers";
 export const metadata = {
-  title: "Quiz | Quizzzy",
+  title: "Quiz | QuizUPM",
   description: "Quiz yourself on anything!",
 };
 
@@ -17,9 +16,7 @@ interface Props {
 
 const Quiz = async ({ searchParams }: Props) => {
   const session = await getAuthSession();
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
-  if (!session?.user && !isAdmin) {
+   if (!session?.user) {
     redirect("/");
   }
   const params = await searchParams;
