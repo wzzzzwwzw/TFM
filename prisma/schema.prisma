@@ -36,15 +36,15 @@ model Session {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String   @unique
   emailVerified DateTime?
   image    String?
   accounts Account[]
   sessions Session[]
   games         Game[] 
-  banned        Boolean   @default(false) // <-- Add this
+  banned        Boolean   @default(false) 
   revoked  Boolean  @default(false) 
-  isOnline      Boolean   @default(false) // <-- Add this
+  isOnline      Boolean   @default(false) 
   isAdmin   Boolean  @default(false)
   lastSeen  DateTime @default(now()) @updatedAt
 

@@ -16,7 +16,7 @@ jest.mock("zod", () => ({
 describe("/api/questions", () => {
   it("POST returns questions", async () => {
     const req = { json: async () => ({ amount: 1, topic: "Math", type: "open_ended" }) } as any;
-    const res = await POST(req, {} as Response); // <-- pass dummy Response
+    const res = await POST(req, {} as Response); 
     expect((await res.json()).questions.length).toBeGreaterThan(0);
   });
 });

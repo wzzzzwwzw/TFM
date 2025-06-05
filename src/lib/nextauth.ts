@@ -12,7 +12,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      isAdmin?: boolean; // <--- Add this
+      isAdmin?: boolean; 
       banned?: boolean;
     } & DefaultSession["user"];
   }
@@ -21,7 +21,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    isAdmin?: boolean; // <--- Add this
+    isAdmin?: boolean; 
     banned?: boolean; 
   }
 }
@@ -41,8 +41,8 @@ export const authOptions: NextAuthOptions = {
       if (db_user) {
         token.id = db_user.id;
         token.isAdmin = db_user.isAdmin;
-        token.banned = db_user.banned; // <--- Add this
-        // Add retry logic for lock wait timeout
+        token.banned = db_user.banned; 
+    
         let retries = 3;
         while (retries > 0) {
           try {
@@ -84,6 +84,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      authorization: {
+      params: {
+        prompt: "select_account"
+      }
+      }
     }),
   ],
 };
