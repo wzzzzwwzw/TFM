@@ -9,6 +9,7 @@ module.exports = {
     ...tsJestTransformCfg,
   },
   moduleNameMapper: {
+    "^server-only$": "<rootDir>/__mocks__/server-only.js",
     "^@/(.*)$": "<rootDir>/src/$1", // <-- This lets you use @/ imports in tests
     "\\.(css|less|scss|sass)$": "identity-obj-proxy"
   },
