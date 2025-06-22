@@ -24,3 +24,4 @@ const Quiz = async ({ searchParams }: Props) => {
 };
 
 export default Quiz;
+

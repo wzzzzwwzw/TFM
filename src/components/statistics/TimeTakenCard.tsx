@@ -10,6 +10,10 @@ type Props = {
 };
 
 const TimeTakenCard = ({ timeEnded, timeStarted }: Props) => {
+  let content = "In progress";
+  if (timeEnded && timeStarted) {
+    content = formatTimeDelta(differenceInSeconds(timeEnded, timeStarted));
+  }
   return (
     <Card className="md:col-span-4">
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -17,9 +21,7 @@ const TimeTakenCard = ({ timeEnded, timeStarted }: Props) => {
         <Hourglass />
       </CardHeader>
       <CardContent>
-        <div className="text-sm font-medium">
-          {formatTimeDelta(differenceInSeconds(timeEnded, timeStarted))}
-        </div>
+        <div className="text-sm font-medium">{content}</div>
       </CardContent>
     </Card>
   );

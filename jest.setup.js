@@ -1,0 +1,2 @@
+require('cross-fetch/polyfill');
+process.env.OPENAI_API_KEY = "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";

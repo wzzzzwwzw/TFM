@@ -39,11 +39,11 @@ const QuestionsList = ({ questions }: Props) => {
             ) => {
               return (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell className="font-medium" >{index + 1}</TableCell>
                   <TableCell>
                     {question} <br />
                     <br />
-                    <span className="font-semibold">{answer}</span>
+                    <span className="font-semibold text-green-600">{answer}</span>
                   </TableCell>
                   {questions[0].questionType === "open_ended" ? (
                     <TableCell className={`font-semibold`}>

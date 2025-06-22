@@ -12,12 +12,11 @@ type Props = {
 };
 
 const MCQPage = async ( props : Props) => {
-  const { params } = props;
+  const  params  = await props.params;
   const { gameId } = params;
 
   const session = await getAuthSession();
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
+  const isAdmin = session?.user?.isAdmin === true;
   if (!session?.user && !isAdmin) {
     redirect("/");
   }

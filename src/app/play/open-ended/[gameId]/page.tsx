@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import React from "react";
-import { cookies } from "next/headers";
+
 type Props = {
   params: {
     gameId: string;
@@ -12,8 +12,7 @@ type Props = {
 
 const OpenEndedPage = async ({ params: { gameId } }: Props) => {
   const session = await getAuthSession();
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "1";
+  const isAdmin = session?.user?.isAdmin === true;
   if (!session?.user && !isAdmin) {
     redirect("/");
   }

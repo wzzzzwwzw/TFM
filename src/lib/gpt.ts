@@ -8,6 +8,94 @@ interface OutputFormat {
   [key: string]: string | string[] | OutputFormat;
 }
 
+function buildOutputFormatPrompt(
+  output_format: OutputFormat,
+  list_output: boolean,
+  dynamic_elements: boolean,
+  list_input: boolean
+) {
+  let prompt = `\nYou are to output the following in json format: ${JSON.stringify(
+    output_format
+  )}. \nDo not put quotation marks or escape character \\ in the output fields.`;
+
+  if (list_output) {
+    prompt += `\nIf output field is a list, classify output into the best element of the list.`;
+  }
+  if (dynamic_elements) {
+    prompt += `\nAny text enclosed by s< and > indicates you must generate content to replace it.
+      Example input: Go to <location>, Example output: Go to the garden\nAny output key containing < and > indicates you must generate the key name to replace it.
+       Example input: {'<location>': 'description of location'}, Example output: {school: a place for education}`;
+  }
+  if (list_input) {
+    prompt += `\nGenerate a list of json, one json for each input element.`;
+  }
+  prompt += `\nAlways escape double quotes inside string values using a backslash (e.g., \\"). Respond ONLY with valid JSON.`;
+  return prompt;
+}
+
+function normalizeOutputValue(
+  value: any,
+  choices: string[],
+  default_category: string
+) {
+  if (Array.isArray(value)) {
+    value = value[0];
+  }
+  if (default_category && !choices.includes(value)) {
+    value = default_category;
+  }
+  if (typeof value === "string" && value.includes(":")) {
+    value = value.split(":")[0];
+  }
+  return value;
+}
+
+function validateAndNormalizeOutput(
+  output: any,
+  output_format: OutputFormat,
+  default_category: string,
+  output_value_only: boolean,
+  list_input: boolean
+) {
+  const outputArr = list_input ? output : [output];
+  for (let index = 0; index < outputArr.length; index++) {
+    for (const key in output_format) {
+      if (/<.*?>/.test(key)) continue;
+      if (!(key in outputArr[index])) {
+        throw new Error(`${key} not in json output`);
+      }
+      if (Array.isArray(output_format[key])) {
+        outputArr[index][key] = normalizeOutputValue(
+          outputArr[index][key],
+          output_format[key] as string[],
+          default_category
+        );
+      }
+    }
+    if (output_value_only) {
+      outputArr[index] = Object.values(outputArr[index]);
+      if (outputArr[index].length === 1) {
+        outputArr[index] = outputArr[index][0];
+      }
+    }
+  }
+  return list_input ? outputArr : outputArr[0];
+}
+
+// Escapes unescaped double quotes inside string values in JSON arrays/objects
+function escapeInnerQuotes(jsonStr: string): string {
+  // This regex finds double quotes inside string values and escapes them
+  // It only escapes quotes that are not already escaped and are inside value strings
+  return jsonStr.replace(
+    /"(.*?)":\s*"(.*?)(?<!\\)"/g,
+    (match, key, value) => {
+      // Escape any unescaped double quotes inside the value
+      const fixedValue = value.replace(/([^\\])"/g, '$1\\"');
+      return `"${key}": "${fixedValue}"`;
+    }
+  );
+}
+
 export async function strict_output(
   system_prompt: string,
   user_prompt: string | string[],
@@ -24,41 +112,21 @@ export async function strict_output(
     answer: string;
   }[]
 > {
-  // if the user input is in a list, we also process the output as a list of json
-  const list_input: boolean = Array.isArray(user_prompt);
-  // if the output format contains dynamic elements of < or >, then add to the prompt to handle dynamic elements
-  const dynamic_elements: boolean = /<.*?>/.test(JSON.stringify(output_format));
-  // if the output format contains list elements of [ or ], then we add to the prompt to handle lists
-  const list_output: boolean = /\[.*?\]/.test(JSON.stringify(output_format));
-
-  // start off with no error message
-  let error_msg: string = "";
+  const list_input = Array.isArray(user_prompt);
+  const dynamic_elements = /<.*?>/.test(JSON.stringify(output_format));
+  const list_output = /\[.*?\]/.test(JSON.stringify(output_format));
+  let error_msg = "";
 
   for (let i = 0; i < num_tries; i++) {
-    let output_format_prompt: string = `\nYou are to output the following in json format: ${JSON.stringify(
-      output_format
-    )}. \nDo not put quotation marks or escape character \\ in the output fields.`;
-
-    if (list_output) {
-      output_format_prompt += `\nIf output field is a list, classify output into the best element of the list.`;
-    }
-
-    // if output_format contains dynamic elements, process it accordingly
-    if (dynamic_elements) {
-      output_format_prompt += `\nAny text enclosed by s< and > indicates you must generate content to replace it.
-        Example input: Go to <location>, Example output: Go to the garden\nAny output key containing < and > indicates you must generate the key name to replace it.
-         Example input: {'<location>': 'description of location'}, Example output: {school: a place for education}`;
-    }
-
-    // if input is in a list format, ask it to generate json in a list
-    if (list_input) {
-      output_format_prompt += `\nGenerate a list of json, one json for each input element.`;
-    }
-
-    // Use OpenAI to get a response
+    const output_format_prompt = buildOutputFormatPrompt(
+      output_format,
+      list_output,
+      dynamic_elements,
+      list_input
+    );
     const response = await openai.chat.completions.create({
-      temperature: temperature,
-      model: model,
+      temperature,
+      model,
       messages: [
         {
           role: "system",
@@ -70,9 +138,22 @@ export async function strict_output(
 
     let res: string =
       response.choices[0].message?.content?.replace(/'/g, '"') ?? "";
+    res = res.replace(/(\w)"(\w)/g, "$1'$2").trim();
 
-    // ensure that we don't replace away apostrophes in text
-    res = res.replace(/(\w)"(\w)/g, "$1'$2");
+    // Try to extract JSON if extra text is present
+    const firstBracket = res.indexOf("[");
+    const firstBrace = res.indexOf("{");
+    if (
+      firstBracket !== -1 &&
+      (firstBracket < firstBrace || firstBrace === -1)
+    ) {
+      res = res.slice(firstBracket);
+    } else if (firstBrace !== -1) {
+      res = res.slice(firstBrace);
+    }
+
+    // Escape inner quotes in values
+    res = escapeInnerQuotes(res);
 
     if (verbose) {
       console.log(
@@ -83,66 +164,23 @@ export async function strict_output(
       console.log("\nGPT response:", res);
     }
 
-    // try-catch block to ensure output format is adhered to
     try {
-      let output: any = JSON.parse(res);
-
-      if (list_input) {
-        if (!Array.isArray(output)) {
-          throw new Error("Output format not in a list of json");
-        }
-      } else {
-        output = [output];
+      let output = JSON.parse(res);
+      if (list_input && !Array.isArray(output)) {
+        throw new Error("Output format not in a list of json");
       }
-
-      // check for each element in the output_list, the format is correctly adhered to
-      for (let index = 0; index < output.length; index++) {
-        for (const key in output_format) {
-          // unable to ensure accuracy of dynamic output header, so skip it
-          if (/<.*?>/.test(key)) {
-            continue;
-          }
-
-          // if output field missing, raise an error
-          if (!(key in output[index])) {
-            throw new Error(`${key} not in json output`);
-          }
-
-          // check that one of the choices given for the list of words is an unknown
-          if (Array.isArray(output_format[key])) {
-            const choices = output_format[key] as string[];
-            // ensure output is not a list
-            if (Array.isArray(output[index][key])) {
-              output[index][key] = output[index][key][0];
-            }
-            // output the default category (if any) if GPT is unable to identify the category
-            if (!choices.includes(output[index][key]) && default_category) {
-              output[index][key] = default_category;
-            }
-            // if the output is a description format, get only the label
-            if (output[index][key].includes(":")) {
-              output[index][key] = output[index][key].split(":")[0];
-            }
-          }
-        }
-
-        // if we just want the values for the outputs
-        if (output_value_only) {
-          output[index] = Object.values(output[index]);
-          // just output without the list if there is only one element
-          if (output[index].length === 1) {
-            output[index] = output[index][0];
-          }
-        }
-      }
-
-      return list_input ? output : output[0];
+      return validateAndNormalizeOutput(
+        output,
+        output_format,
+        default_category,
+        output_value_only,
+        list_input
+      );
     } catch (e) {
       error_msg = `\n\nResult: ${res}\n\nError message: ${e}`;
       console.log("An exception occurred:", e);
       console.log("Current invalid json format:", res);
     }
   }
-
   return [];
 }

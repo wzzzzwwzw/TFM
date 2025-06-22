@@ -1,4 +1,5 @@
 import { POST } from "@/app/api/checkAnswer/route";
+import { ZodError } from "zod";
 
 jest.mock("@/lib/db", () => ({
   prisma: {
@@ -6,8 +7,9 @@ jest.mock("@/lib/db", () => ({
       findUnique: jest.fn().mockResolvedValue({ id: "1", answer: "42", questionType: "mcq" }),
       update: jest.fn().mockResolvedValue({}),
     },
-  },
+  }
 }));
+
 jest.mock("@/schemas/questions", () => ({
   checkAnswerSchema: { parse: (x: any) => x },
 }));
@@ -54,5 +56,19 @@ describe("/api/checkAnswer", () => {
     expect(res.status).toBe(404);
     const json = await res.json();
     expect(json.message).toBe("Question not found");
+  });
+
+  it("returns 400 if validation fails", async () => {
+    // Override the parse method to throw a ZodError
+    const { checkAnswerSchema } = require("@/schemas/questions");
+    checkAnswerSchema.parse = () => { throw new ZodError([{ code: "custom", message: "Invalid", path: ["questionId"] }]); };
+
+    const req = { json: async () => ({}) } as any;
+    const res = await POST(req as Request, {} as Response);
+    expect(res).toBeDefined();
+    if (!res) throw new Error("Response is undefined");
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.message).toBeDefined();
   });
 });
