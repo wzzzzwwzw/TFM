@@ -83,7 +83,6 @@ function validateAndNormalizeOutput(
   return list_input ? outputArr : outputArr[0];
 }
 
-// Escapes unescaped double quotes inside string values in JSON arrays/objects
 function escapeInnerQuotes(jsonStr: string): string {
   let inString = false;
   let prevChar = '';
@@ -93,9 +92,6 @@ function escapeInnerQuotes(jsonStr: string): string {
     if (char === '"' && prevChar !== '\\') {
       inString = !inString;
       result += char;
-    } else if (char === '"' && inString && prevChar !== '\\') {
-      // Escape inner quote
-      result += '\\"';
     } else {
       result += char;
     }
