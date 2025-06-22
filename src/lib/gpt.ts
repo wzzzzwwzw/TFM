@@ -29,7 +29,7 @@ function buildOutputFormatPrompt(
   if (list_input) {
     prompt += `\nGenerate a list of json, one json for each input element.`;
   }
-  prompt += `\nAlways escape double quotes inside string values using a backslash (e.g., \\"). Respond ONLY with valid JSON.`;
+  prompt += `\nAlways escape double quotes inside string values using a backslash (e.g., \\"). Respond ONLY with valid JSON. All property names and string values must be wrapped in double quotes.`;
   return prompt;
 }
 
@@ -60,6 +60,7 @@ function validateAndNormalizeOutput(
   const outputArr = list_input ? output : [output];
   for (let index = 0; index < outputArr.length; index++) {
     for (const key in output_format) {
+      // SAFE: Avoid regex, just check for both chars
       if (key.includes("<") && key.includes(">")) continue;
       if (!(key in outputArr[index])) {
         throw new Error(`${key} not in json output`);
@@ -84,8 +85,6 @@ function validateAndNormalizeOutput(
 
 // Escapes unescaped double quotes inside string values in JSON arrays/objects
 function escapeInnerQuotes(jsonStr: string): string {
-  // This regex finds double quotes inside string values and escapes them
-  // It only escapes quotes that are not already escaped and are inside value strings
   return jsonStr.replace(
     /"(.*?)":\s*"(.*?)(?<!\\)"/g,
     (match, key, value) => {
@@ -94,6 +93,11 @@ function escapeInnerQuotes(jsonStr: string): string {
       return `"${key}": "${fixedValue}"`;
     }
   );
+}
+
+// Quotes property names that are not already quoted
+function quotePropertyNames(jsonStr: string): string {
+  return jsonStr.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
 }
 
 export async function strict_output(
@@ -113,8 +117,9 @@ export async function strict_output(
   }[]
 > {
   const list_input = Array.isArray(user_prompt);
-  const dynamic_elements = /<.*?>/.test(JSON.stringify(output_format));
-  const list_output = /\[.*?\]/.test(JSON.stringify(output_format));
+  // SAFE: Avoid regex, just check for both chars
+  const dynamic_elements = JSON.stringify(output_format).includes("<") && JSON.stringify(output_format).includes(">");
+  const list_output = JSON.stringify(output_format).includes("[") && JSON.stringify(output_format).includes("]");
   let error_msg = "";
 
   for (let i = 0; i < num_tries; i++) {
@@ -152,7 +157,8 @@ export async function strict_output(
       res = res.slice(firstBrace);
     }
 
-    // Escape inner quotes in values
+    // Fix property names and escape inner quotes
+    res = quotePropertyNames(res);
     res = escapeInnerQuotes(res);
 
     if (verbose) {
