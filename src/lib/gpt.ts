@@ -85,14 +85,23 @@ function validateAndNormalizeOutput(
 
 // Escapes unescaped double quotes inside string values in JSON arrays/objects
 function escapeInnerQuotes(jsonStr: string): string {
-  return jsonStr.replace(
-    /"(.*?)":\s*"(.*?)(?<!\\)"/g,
-    (match, key, value) => {
-      // Escape any unescaped double quotes inside the value
-      const fixedValue = value.replace(/([^\\])"/g, '$1\\"');
-      return `"${key}": "${fixedValue}"`;
+  let inString = false;
+  let prevChar = '';
+  let result = '';
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i];
+    if (char === '"' && prevChar !== '\\') {
+      inString = !inString;
+      result += char;
+    } else if (char === '"' && inString && prevChar !== '\\') {
+      // Escape inner quote
+      result += '\\"';
+    } else {
+      result += char;
     }
-  );
+    prevChar = char;
+  }
+  return result;
 }
 
 // Quotes property names that are not already quoted
