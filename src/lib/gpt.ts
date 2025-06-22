@@ -60,7 +60,7 @@ function validateAndNormalizeOutput(
   const outputArr = list_input ? output : [output];
   for (let index = 0; index < outputArr.length; index++) {
     for (const key in output_format) {
-      if (/<.*?>/.test(key)) continue;
+      if (key.includes("<") && key.includes(">")) continue;
       if (!(key in outputArr[index])) {
         throw new Error(`${key} not in json output`);
       }
