@@ -1,23 +1,78 @@
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (data: any, init?: any) => ({
+      status: init?.status ?? 200,
+      json: async () => data,
+    }),
+  },
+}));
+
 import { POST } from "@/app/api/users/[userId]/ban/route";
-import { NextRequest } from "next/server";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/nextauth";
 
 jest.mock("@/lib/db", () => ({
   prisma: {
     user: {
-      update: jest.fn().mockResolvedValue({ id: "1", banned: true }),
+      update: jest.fn(),
     },
   },
 }));
 jest.mock("next-auth", () => ({
-  getServerSession: jest.fn().mockResolvedValue({ user: { isAdmin: true } }),
+  getServerSession: jest.fn(),
 }));
-jest.mock("@/lib/nextauth", () => ({}));
+jest.mock("@/lib/nextauth", () => ({
+  authOptions: {},
+}));
 
-describe("/api/users/[userId]/ban", () => {
-  it("bans a user if admin", async () => {
-    const req = {} as NextRequest;
-    const context = { params: { userId: "1" } };
-    const res = await POST(req, context);
-    expect((await res.json()).success).toBe(true);
+describe("/api/users/[userId]/ban POST", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns 401 if not admin", async () => {
+    (getServerSession as jest.Mock).mockResolvedValue({ user: { isAdmin: false } });
+    const req = {} as any;
+    const res = {} as any;
+    const response = await POST(req, { params: { userId: "1" } });
+    expect(response.status).toBe(401);
+    const json = await response.json();
+    expect(json.error).toBe("Unauthorized");
+  });
+
+  it("bans user if admin", async () => {
+    (getServerSession as jest.Mock).mockResolvedValue({ user: { isAdmin: true } });
+    (prisma.user.update as jest.Mock).mockResolvedValue({});
+    const req = {} as any;
+    const res = {} as any;
+    const response = await POST(req, { params: { userId: "1" } });
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.success).toBe(true);
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: "1" },
+      data: { banned: true },
+    });
+  });
+
+  it("returns 500 if update fails", async () => {
+    (getServerSession as jest.Mock).mockResolvedValue({ user: { isAdmin: true } });
+    (prisma.user.update as jest.Mock).mockRejectedValue(new Error("fail"));
+    const req = {} as any;
+    const res = {} as any;
+    const response = await POST(req, { params: { userId: "1" } });
+    expect(response.status).toBe(500);
+    const json = await response.json();
+    expect(json.error).toBe("Failed to ban user");
+  });
+  it("returns 401 if no session", async () => {
+    (getServerSession as jest.Mock).mockResolvedValue(null);
+    const req = {} as any;
+    const res = {} as any;
+    const response = await POST(req, { params: { userId: "1" } });
+    expect(response.status).toBe(401);
+    const json = await response.json();
+    expect(json.error).toBe("Unauthorized");
   });
 });

@@ -60,3 +60,16 @@ export function similarity(a: string, b: string) {
   const maxLen = Math.max(a.length, b.length);
   return maxLen === 0 ? 1 : 1 - distance / maxLen;
 }
+
+// utils/statistics.ts
+export function calculateAccuracy(game: any): number {
+  if (!game.questions.length) return 0;
+  if (game.gameType === "mcq") {
+    const totalCorrect = game.questions.filter((q: any) => q.isCorrect).length;
+    return Math.round((totalCorrect / game.questions.length) * 100 * 100) / 100;
+  } else if (game.gameType === "open_ended") {
+    const total = game.questions.reduce((acc: number, q: any) => acc + (q.percentageCorrect ?? 0), 0);
+    return Math.round((total / game.questions.length) * 100) / 100;
+  }
+  return 0;
+}

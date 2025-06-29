@@ -13,6 +13,16 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+    const contentType = req.headers.get("content-type") || "";
+  if (
+    !contentType.startsWith("multipart/form-data") &&
+    !contentType.startsWith("application/x-www-form-urlencoded")
+  ) {
+    return NextResponse.json(
+      { error: "Content-Type must be multipart/form-data or application/x-www-form-urlencoded." },
+      { status: 400 }
+    );
+  }
   const formData = await req.formData();
   const file = formData.get("file") as File;
 

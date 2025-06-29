@@ -7,7 +7,7 @@ const categories = [
   { name: "Math", img: "/math.png" },
   { name: "Science", img: "/categories/Science.png" },
   { name: "History", img: "/categories/History.png" },
-  { name: "Programming",img: "/categories/image--programming.svg"}, // Use SVG component for Geography
+  { name: "Programming", img: "/categories/image--programming.svg" },
 ];
 
 export default function HomeClient() {
@@ -15,31 +15,65 @@ export default function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [revoked, setRevoked] = useState<boolean | null>(null);
 
+  // Fetch current user info to check if revoked
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch("/api/quiz-review")
+    fetch("/api/users")
       .then((res) => res.json())
       .then((data) => {
-        setQuizzes(data.quizzes || []);
-        setLoading(false);
+        setRevoked(!!data.revoked);
       })
-      .catch(() => {
-        setError("Error loading quizzes.");
-        setLoading(false);
-      });
+      .catch(() => setRevoked(false)); // fallback: allow access if error
   }, []);
 
-  const filteredQuizzes = selectedCategory
-    ? quizzes.filter((quiz: any) => quiz.category === selectedCategory)
-    : quizzes;
+  // Fetch quizzes only if not revoked
+  useEffect(() => {
+    if (revoked === false) {
+      setLoading(true);
+      setError(null);
+      fetch("/api/quiz-review")
+        .then((res) => res.json())
+        .then((data) => {
+          setQuizzes(data.quizzes || []);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Error loading quizzes.");
+          setLoading(false);
+        });
+    }
+  }, [revoked]);
+
+  // Filtering logic for category and difficulty
+  const filteredQuizzes = quizzes.filter((quiz: any) => {
+    const categoryMatch = !selectedCategory || quiz.category === selectedCategory;
+    const difficultyMatch = !selectedDifficulty || quiz.difficulty === selectedDifficulty;
+    return categoryMatch && difficultyMatch;
+  });
+
+  // Show loading while checking revoked status
+  if (revoked === null) {
+    return <div>Loading...</div>;
+  }
+
+  // If revoked, show message and block access
+  if (revoked) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-red-600 text-xl font-bold">
+          Access Denied: Your access to this page has been revoked.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Available Quizzes</h1>
 
-      {/* Category Filter */}
+      {/* Category and Difficulty Filters */}
       <div className="mb-6 flex gap-4">
         <label htmlFor="category" className="font-semibold">
           Category:
@@ -56,6 +90,21 @@ export default function HomeClient() {
               {cat.name}
             </option>
           ))}
+        </select>
+
+        <label htmlFor="difficulty" className="font-semibold">
+          Difficulty:
+        </label>
+        <select
+          id="difficulty"
+          value={selectedDifficulty || ""}
+          onChange={(e) => setSelectedDifficulty(e.target.value || null)}
+          className="border rounded px-2 py-1"
+        >
+          <option value="">All</option>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="hard">Hard</option>
         </select>
       </div>
 

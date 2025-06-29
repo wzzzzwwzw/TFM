@@ -1,77 +1,163 @@
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (data: any, init?: any) => ({
+      status: init?.status ?? 200,
+      json: async () => data,
+    }),
+  },
+}));
+
 import { POST, GET } from "@/app/api/user-quiz-stats/route";
-import { NextRequest } from "next/server";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/nextauth";
 
 jest.mock("@/lib/db", () => ({
   prisma: {
     userQuizAttempt: {
-      create: jest.fn().mockResolvedValue({ id: "1" }),
-      findMany: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+      findMany: jest.fn(),
     },
   },
 }));
 jest.mock("next-auth", () => ({
-  getServerSession: jest.fn().mockResolvedValue({ user: { id: "1" } }),
+  getServerSession: jest.fn(),
 }));
-jest.mock("@/lib/nextauth", () => ({}));
+jest.mock("@/lib/nextauth", () => ({
+  authOptions: {},
+}));
 
 describe("/api/user-quiz-stats", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const { getServerSession } = require("next-auth");
-    getServerSession.mockResolvedValue({ user: { id: "1" } });
   });
 
-  it("POST saves an attempt", async () => {
-    const req = { json: async () => ({ userId: "1", quizId: "1", quizTitle: "Quiz", answers: [], score: 100 }) } as any;
-    const res = await POST(req);
-    expect((await res.json()).attempt).toBeDefined();
+  describe("POST", () => {
+    it("creates a user quiz attempt and returns it", async () => {
+      const mockAttempt = {
+        id: "1",
+        userId: "u1",
+        quizId: "q1",
+        quizTitle: "Quiz 1",
+        answers: [{ q: 1, a: "A" }],
+        score: 80,
+      };
+      (prisma.userQuizAttempt.create as jest.Mock).mockResolvedValue(mockAttempt);
+
+      const req = {
+        json: jest.fn().mockResolvedValue({
+          userId: "u1",
+          quizId: "q1",
+          quizTitle: "Quiz 1",
+          answers: [{ q: 1, a: "A" }],
+          score: 80,
+        }),
+      } as any;
+      const res = {} as any;
+      const response = await POST(req);
+      expect(response.status).toBe(201);
+      const json = await response.json();
+      expect(json.attempt).toEqual(mockAttempt);
+      expect(prisma.userQuizAttempt.create).toHaveBeenCalledWith({
+        data: {
+          userId: "u1",
+          quizId: "q1",
+          quizTitle: "Quiz 1",
+          answers: [{ q: 1, a: "A" }],
+          score: 80,
+        },
+      });
+    });
+
+    it("returns 500 on error", async () => {
+      (prisma.userQuizAttempt.create as jest.Mock).mockRejectedValue(new Error("fail"));
+
+      const req = {
+        json: jest.fn().mockResolvedValue({
+          userId: "u1",
+          quizId: "q1",
+          quizTitle: "Quiz 1",
+          answers: [{ q: 1, a: "A" }],
+          score: 80,
+        }),
+      } as any;
+      const res = {} as any;
+      const response = await POST(req);
+      expect(response.status).toBe(500);
+      const json = await response.json();
+      expect(json.error).toBe("Failed to save attempt");
+    });
   });
 
-  it("POST returns 500 if DB error", async () => {
-    const { prisma } = require("@/lib/db");
-    prisma.userQuizAttempt.create.mockImplementationOnce(async () => { throw new Error("DB error"); });
-    const req = { json: async () => ({ userId: "1", quizId: "1", quizTitle: "Quiz", answers: [], score: 100 }) } as any;
-    const res = await POST(req);
-    expect(res.status).toBe(500);
-    const json = await res.json();
-    expect(json.error).toBe("Failed to save attempt");
-  });
+  describe("GET", () => {
+    it("returns empty quizStats if not authenticated", async () => {
+      (getServerSession as jest.Mock).mockResolvedValue(null);
 
-  it("GET returns stats", async () => {
-    const req = {} as NextRequest;
-    const res = await GET(req);
-    expect((await res.json()).quizStats).toBeDefined();
-  });
+      const req = {} as any;
+      const res = {} as any;
+      const response = await GET(req);
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      expect(json.quizStats).toEqual([]);
+    });
 
-  it("GET returns empty stats if no session", async () => {
-    const { getServerSession } = require("next-auth");
-    getServerSession.mockResolvedValueOnce(null);
-    const req = {} as NextRequest;
-    const res = await GET(req);
-    expect((await res.json()).quizStats).toEqual([]);
-  });
+    it("returns aggregated quiz stats for user", async () => {
+      (getServerSession as jest.Mock).mockResolvedValue({ user: { id: "u1" } });
+      (prisma.userQuizAttempt.findMany as jest.Mock).mockResolvedValue([
+        {
+          quizId: "q1",
+          quizTitle: "Quiz 1",
+          score: 80,
+          createdAt: new Date("2024-01-01"),
+        },
+        {
+          quizId: "q1",
+          quizTitle: "Quiz 1",
+          score: 90,
+          createdAt: new Date("2024-01-02"),
+        },
+        {
+          quizId: "q2",
+          quizTitle: "Quiz 2",
+          score: 70,
+          createdAt: new Date("2024-01-03"),
+        },
+      ]);
 
-  it("GET aggregates stats correctly", async () => {
-    const { prisma } = require("@/lib/db");
-    const now = new Date();
-    prisma.userQuizAttempt.findMany.mockResolvedValueOnce([
-      { quizId: "1", quizTitle: "Quiz 1", score: 80, createdAt: now },
-      { quizId: "1", quizTitle: "Quiz 1", score: 100, createdAt: now },
-      { quizId: "2", quizTitle: "Quiz 2", score: 50, createdAt: now },
-    ]);
-    const req = {} as NextRequest;
-    const res = await GET(req);
-    const stats = (await res.json()).quizStats;
-    expect(stats.length).toBe(2);
-    expect(stats.find((s: any) => s.id === "1").averageScore).toBe(90);
-    expect(stats.find((s: any) => s.id === "2").averageScore).toBe(50);
-  });
+      const req = {} as any;
+      const res = {} as any;
+      const response = await GET(req);
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      expect(json.quizStats.length).toBe(2);
+      expect(json.quizStats).toEqual([
+        {
+          id: "q1",
+          title: "Quiz 1",
+          attempts: 2,
+          averageScore: 85,
+          lastAttempt: new Date("2024-01-02"),
+        },
+        {
+          id: "q2",
+          title: "Quiz 2",
+          attempts: 1,
+          averageScore: 70,
+          lastAttempt: new Date("2024-01-03"),
+        },
+      ]);
+    });
 
-  it("GET returns empty stats if DB error", async () => {
-    const { prisma } = require("@/lib/db");
-    prisma.userQuizAttempt.findMany.mockImplementationOnce(async () => { throw new Error("DB error"); });
-    const req = {} as NextRequest;
-    const res = await GET(req);
-    expect((await res.json()).quizStats).toEqual([]);
+    it("returns empty quizStats on error", async () => {
+      (getServerSession as jest.Mock).mockResolvedValue({ user: { id: "u1" } });
+      (prisma.userQuizAttempt.findMany as jest.Mock).mockRejectedValue(new Error("fail"));
+
+      const req = {} as any;
+      const res = {} as any;
+      const response = await GET(req);
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      expect(json.quizStats).toEqual([]);
+    });
   });
 });

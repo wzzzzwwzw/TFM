@@ -13,10 +13,13 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    await prisma.user.update({
+    const updated = await prisma.user.update({
       where: { id: params.userId },
       data: { revoked: true },
     });
+    if (!updated) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to revoke user" }, { status: 500 });

@@ -14,6 +14,7 @@ declare module "next-auth" {
       id: string;
       isAdmin?: boolean; 
       banned?: boolean;
+      revoked?: boolean; 
     } & DefaultSession["user"];
   }
 }
@@ -23,6 +24,7 @@ declare module "next-auth/jwt" {
     id: string;
     isAdmin?: boolean; 
     banned?: boolean; 
+    revoked?: boolean; 
   }
 }
 
@@ -32,6 +34,7 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    
     jwt: async ({ token }) => {
       const db_user = await prisma.user.findFirst({
         where: {
@@ -41,8 +44,12 @@ export const authOptions: NextAuthOptions = {
       if (db_user) {
         token.id = db_user.id;
         token.isAdmin = db_user.isAdmin;
-        token.banned = db_user.banned; 
-    
+        token.banned = db_user.banned;
+        token.name = db_user.name;
+        token.email = db_user.email;
+        token.picture = db_user.image;
+        token.revoked = db_user.revoked;
+
         let retries = 3;
         while (retries > 0) {
           try {
@@ -54,8 +61,8 @@ export const authOptions: NextAuthOptions = {
           } catch (err: any) {
             if (
               retries > 1 &&
-              (err.code === 'P2034' ||
-                (err.message && err.message.includes('Lock wait timeout')))
+              (err.code === "P2034" ||
+                (err.message && err.message.includes("Lock wait timeout")))
             ) {
               await new Promise((res) => setTimeout(res, 500));
               retries--;
@@ -68,13 +75,14 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: ({ session, token }) => {
-      if (token) {
+      if (token.id) {
         session.user.id = token.id;
-        session.user.isAdmin = token.isAdmin; 
-        session.user.banned = token.banned;// <--- Add this
+        session.user.isAdmin = token.isAdmin;
+        session.user.banned = token.banned;
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
+        session.user.revoked = token.revoked;
       }
       return session;
     },
@@ -85,10 +93,10 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       authorization: {
-      params: {
-        prompt: "select_account"
-      }
-      }
+        params: {
+          prompt: "select_account",
+        },
+      },
     }),
   ],
 };

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import React from "react";
-import { cookies } from "next/headers";
+
 
 type Props = {
   params: {

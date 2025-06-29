@@ -8,6 +8,7 @@ type User = {
   lastSeen?: string;
   banned?: boolean;
   revoked?: boolean;
+  isAdmin?: boolean;
 };
 
 const UserManagement = () => {
@@ -47,15 +48,32 @@ const UserManagement = () => {
     await fetch(`/api/users/${userId}/unban`, { method: "POST" });
     fetchUsers();
   };
+const handleRevokeUser = async (userId: string) => {
+  await fetch(`/api/users/${userId}/revoke`, { method: "POST" });
+  setUsers((prev) =>
+    prev.map((u) =>
+      u.id === userId ? { ...u, revoked: true } : u
+    )
+  );
+};
 
-  const handleRevokeUser = async (userId: string) => {
-    await fetch(`/api/users/${userId}/revoke`, { method: "POST" });
-    fetchUsers();
-  };
+const handleUnrevokeUser = async (userId: string) => {
+  await fetch(`/api/users/${userId}/unrevoke`, { method: "POST" });
+  setUsers((prev) =>
+    prev.map((u) =>
+      u.id === userId ? { ...u, revoked: false } : u
+    )
+  );
+};
 
-  const handleUnrevokeUser = async (userId: string) => {
-    await fetch(`/api/users/${userId}/unrevoke`, { method: "POST" });
-    fetchUsers();
+  const handleAssignAdmin = async (userId: string) => {
+    await fetch(`/api/users/${userId}/assign-admin`, { method: "POST" });
+    // Optimistically update UI
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId ? { ...u, isAdmin: true } : u
+      )
+    );
   };
 
   const isUserOnline = (lastSeen?: string) => {
@@ -87,6 +105,7 @@ const UserManagement = () => {
               <th className="py-3 px-4 text-left">Online Status</th>
               <th className="py-3 px-4 text-left">Banned</th>
               <th className="py-3 px-4 text-left">Revoked</th>
+              <th className="py-3 px-4 text-left">Admin</th>
               <th className="py-3 px-4 text-left">Actions</th>
             </tr>
           </thead>
@@ -118,7 +137,24 @@ const UserManagement = () => {
                     <span className="text-green-600">Allowed</span>
                   )}
                 </td>
+                <td className="py-4 px-4">
+                  {user.isAdmin ? (
+                    <span className="text-blue-600 font-bold flex items-center gap-1">
+                      Admin <span title="Admin" role="img" aria-label="admin">🛡️</span>
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">User</span>
+                  )}
+                </td>
                 <td className="py-4 px-4 space-x-2">
+                  {!user.isAdmin && (
+                    <button
+                      onClick={() => handleAssignAdmin(user.id)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      Make Admin
+                    </button>
+                  )}
                   {user.revoked ? (
                     <button
                       onClick={() => handleUnrevokeUser(user.id)}

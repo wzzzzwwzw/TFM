@@ -2,7 +2,8 @@ import { prisma } from "@/lib/db";
 import { checkAnswerSchema } from "@/schemas/questions";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import stringSimilarity from "string-similarity";
+//import stringSimilarity from "string-similarity";
+import levenshtein from "fast-levenshtein";
 
 export async function POST(req: Request, res: Response) {
   try {
@@ -36,11 +37,21 @@ export async function POST(req: Request, res: Response) {
         isCorrect,
       });
     } else if (question.questionType === "open_ended") {
-      let percentageSimilar = stringSimilarity.compareTwoStrings(
-        question.answer.toLowerCase().trim(),
-        userInput.toLowerCase().trim()
-      );
-      percentageSimilar = Math.round(percentageSimilar * 100);
+      const correct = question.answer.toLowerCase().trim();
+      const user = userInput.toLowerCase().trim();
+      const distance = levenshtein.get(correct, user);
+      const maxLen = Math.max(correct.length, user.length);
+
+      // Make it stricter: if distance is more than 40% of maxLen, set similarity to 0
+      let percentageSimilar = 0;
+      if (maxLen === 0) {
+        percentageSimilar = 100;
+      } else if (distance > maxLen * 0.2) {
+        percentageSimilar = 0;
+      } else {
+        percentageSimilar = Math.round((1 - distance / maxLen) * 100);
+      }
+
       await prisma.question.update({
         where: { id: questionId },
         data: { percentageCorrect: percentageSimilar },

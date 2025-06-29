@@ -35,7 +35,7 @@ export default function QuizPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`/api/quiz-review?id=${quizId}`)
+      fetch(`/api/start-quiz/${quizId}`)
       .then(res => res.json())
       .then(data => {
         if (data && Array.isArray(data.quizzes) && data.quizzes.length > 0) {

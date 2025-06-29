@@ -1,62 +1,117 @@
-import { POST } from "@/app/api/questions/route";
-
-// Mock strict_output (OpenAI)
-jest.mock("@/lib/gpt", () => ({
-  strict_output: jest.fn().mockImplementation((_prompt, _arr, _schema) => {
-    // Return different mock data based on schema
-    if (_schema.option1) {
-      // MCQ
-      return Promise.resolve([
-        {
-          question: "MCQ Q1",
-          answer: "A1",
-          option1: "B1",
-          option2: "C1",
-          option3: "D1",
-        },
-      ]);
-    }
-    // Open-ended
-    return Promise.resolve([
-      {
-        question: "Open Q1",
-        answer: "A1",
-      },
-    ]);
-  }),
-}));
-
-// Mock session
-jest.mock("@/lib/nextauth", () => ({
-  getAuthSession: jest.fn().mockResolvedValue({ user: { id: "1" } }),
-}));
-
-// Mock schema validation
-jest.mock("@/schemas/questions", () => ({
-  getQuestionsSchema: {
-    parse: (x: any) => x,
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (data: any, init?: any) => ({
+      status: init?.status ?? 200,
+      json: async () => data,
+    }),
   },
 }));
 
-describe("/api/questions", () => {
-  it("POST returns open-ended questions", async () => {
-    const req = { json: async () => ({ amount: 1, topic: "Math", type: "open_ended" }) } as any;
-    const res = await POST(req, {} as Response);
-    const data = await res.json();
-    expect(data.questions.length).toBeGreaterThan(0);
-    expect(data.questions[0]).toHaveProperty("question");
-    expect(data.questions[0]).toHaveProperty("answer");
+import { POST } from "@/app/api/questions/route";
+import { getAuthSession } from "@/lib/nextauth";
+import { strict_output } from "@/lib/gpt";
+
+jest.mock("@/lib/nextauth", () => ({
+  getAuthSession: jest.fn(),
+}));
+jest.mock("@/lib/gpt", () => ({
+  strict_output: jest.fn(),
+}));
+
+describe("/api/questions POST", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("POST returns MCQ questions", async () => {
-    const req = { json: async () => ({ amount: 1, topic: "Math", type: "mcq" }) } as any;
-    const res = await POST(req, {} as Response);
-    const data = await res.json();
-    expect(data.questions.length).toBeGreaterThan(0);
-    expect(data.questions[0]).toHaveProperty("question");
-    expect(data.questions[0]).toHaveProperty("answer");
-    expect(data.questions[0]).toHaveProperty("option1");
-    expect(data.questions[0]).toHaveProperty("option2");
-    expect(data.questions[0]).toHaveProperty("option3");
+  it("returns 200 and questions for open_ended", async () => {
+    (getAuthSession as jest.Mock).mockResolvedValue({ user: { id: "u1" } });
+    (strict_output as jest.Mock).mockResolvedValue([
+      { question: "Q1", answer: "A1" },
+      { question: "Q2", answer: "A2" },
+    ]);
+
+    const req = {
+      json: jest.fn().mockResolvedValue({
+        amount: 2,
+        topic: "Math",
+        type: "open_ended",
+      }),
+    } as any;
+    const res = {} as any;
+
+    const response = await POST(req, res);
+    expect(response).toBeDefined();
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.questions.length).toBe(2);
+    expect(strict_output).toHaveBeenCalled();
+  });
+
+  it("returns 200 and questions for mcq", async () => {
+    (getAuthSession as jest.Mock).mockResolvedValue({ user: { id: "u1" } });
+    (strict_output as jest.Mock).mockResolvedValue([
+      {
+        question: "Q1",
+        answer: "A1",
+        option1: "O1",
+        option2: "O2",
+        option3: "O3",
+      },
+    ]);
+
+    const req = {
+      json: jest.fn().mockResolvedValue({
+        amount: 1,
+        topic: "Science",
+        type: "mcq",
+      }),
+    } as any;
+    const res = {} as any;
+
+    const response = await POST(req, res);
+    expect(response).toBeDefined();
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.questions.length).toBe(1);
+    expect(strict_output).toHaveBeenCalled();
+  });
+
+  it("returns 400 for invalid input", async () => {
+    (getAuthSession as jest.Mock).mockResolvedValue({ user: { id: "u1" } });
+
+    const req = {
+      json: jest.fn().mockResolvedValue({
+        topic: "Math",
+        type: "mcq",
+        // missing amount
+      }),
+    } as any;
+    const res = {} as any;
+
+    const response = await POST(req, res);
+    expect(response).toBeDefined();
+    expect(response.status).toBe(400);
+    const json = await response.json();
+    expect(json.error).toBeDefined();
+  });
+
+  it("returns 500 for unexpected error", async () => {
+    (getAuthSession as jest.Mock).mockResolvedValue({ user: { id: "u1" } });
+    (strict_output as jest.Mock).mockRejectedValue(new Error("fail"));
+
+    const req = {
+      json: jest.fn().mockResolvedValue({
+        amount: 1,
+        topic: "Science",
+        type: "mcq",
+      }),
+    } as any;
+    const res = {} as any;
+
+    const response = await POST(req, res);
+    expect(response).toBeDefined();
+    expect(response.status).toBe(500);
+    const json = await response.json();
+    expect(json.error).toBe("An unexpected error occurred.");
   });
 });

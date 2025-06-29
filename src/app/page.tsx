@@ -8,10 +8,18 @@ import {
 } from "@/components/ui/card";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-
+import { prisma } from "@/lib/db";
 export default async function Home() {
   const session = await getServerSession();
-  if (session?.user) {
+   if (session?.user) {
+    // Fetch user from DB to check banned status
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { banned: true },
+    });
+    if (user?.banned) {
+      redirect("/banned");
+    }
     redirect("/dashboard");
   }
   return (
