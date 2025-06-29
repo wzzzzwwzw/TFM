@@ -152,7 +152,7 @@ const handleUnrevokeUser = async (userId: string) => {
                       onClick={() => handleAssignAdmin(user.id)}
                       className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                     >
-                      Make Admin
+                      Assign Admin
                     </button>
                   )}
                   {user.revoked ? (
