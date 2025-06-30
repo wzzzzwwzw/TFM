@@ -47,7 +47,7 @@ export default function QuizReview({
   };
 
   return (
-    <div className="p-6 border rounded-xl bg-white shadow-md">
+    <div className="p-6 border rounded-xl bg-white dark:bg-black shadow-md">
       <h2 className="text-2xl font-bold mb-4">Review Quiz</h2>
       <div className="flex gap-4 mb-4 items-center">
         <div>

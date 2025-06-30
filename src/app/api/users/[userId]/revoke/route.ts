@@ -25,3 +25,21 @@ export async function POST(
     return NextResponse.json({ error: "Failed to revoke user" }, { status: 500 });
   }
 }
+export async function GET(
+  req: NextRequest,
+  context: { params: { userId: string } }
+) {
+  const { params } = context;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: params.userId },
+      select: { revoked: true },
+    });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    return NextResponse.json({ revoked: user.revoked }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+  }
+}

@@ -34,7 +34,7 @@ const AdminDashboardClient = () => {
     <main className="p-8 mx-auto max-w-7xl">
       <h2 className="mb-6 text-3xl font-bold tracking-tight">Admin Dashboard</h2>
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="bg-white dark:bg-black">
           <CardHeader>
             <CardTitle>Upload New Quiz</CardTitle>
             <CardDescription>Upload or create a new quiz for review.</CardDescription>
@@ -43,7 +43,7 @@ const AdminDashboardClient = () => {
             <QuizUpload onQuizReady={handleQuizReady} />
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white dark:bg-black">
           <CardHeader>
             <CardTitle>Quiz Statistics</CardTitle>
             <CardDescription>Overview of quiz performance and stats.</CardDescription>
@@ -54,7 +54,7 @@ const AdminDashboardClient = () => {
         </Card>
       </div>
       <div className="grid gap-6 mt-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-4 bg-white dark:bg-black">
           <CardHeader>
             <CardTitle>Quiz Review / List</CardTitle>
             <CardDescription>
@@ -69,7 +69,7 @@ const AdminDashboardClient = () => {
             )}
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-3 bg-white dark:bg-black">
           <CardHeader>
             <CardTitle>User Management</CardTitle>
             <CardDescription>Manage users and their permissions.</CardDescription>

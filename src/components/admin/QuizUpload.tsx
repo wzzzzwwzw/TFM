@@ -84,7 +84,7 @@ const QuizUpload = ({ onQuizReady }: QuizUploadProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4 bg-white dark:bg-black rounded-xl shadow p-6">
       <div
         className={`w-full max-w-md border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center transition-colors
           ${file ? "border-green-400 bg-green-50" : "border-blue-400 bg-blue-50 hover:bg-blue-100"}

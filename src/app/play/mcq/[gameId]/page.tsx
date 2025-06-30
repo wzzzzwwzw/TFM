@@ -4,7 +4,6 @@ import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import React from "react";
 
-
 type Props = {
   params: {
     gameId: string;

@@ -13,7 +13,9 @@ const AccuracyCard = ({ accuracy }: Props) => {
         <Target />
       </CardHeader>
       <CardContent>
-        <div className="text-sm font-medium">{accuracy.toString() + "%"}</div>
+        <div className="text-sm font-medium text-center">
+          {accuracy.toString() + "%"}
+        </div>
       </CardContent>
     </Card>
   );

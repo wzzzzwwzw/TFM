@@ -27,9 +27,9 @@ const QuizStatistics = () => {
   }, []);
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-white dark:bg-black rounded-xl shadow">
       <h2 className="text-2xl font-bold mb-4">Quiz Statistics</h2>
-      <table className="min-w-full bg-white border border-gray-300">
+      <table className="min-w-full bg-white dark:bg-black border border-gray-300">
         <thead>
           <tr>
             <th className="border border-gray-300 px-4 py-2">Quiz Title</th>

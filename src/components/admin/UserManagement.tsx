@@ -89,7 +89,7 @@ const handleUnrevokeUser = async (userId: string) => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-white dark:bg-black rounded-xl shadow">
       <h2 className="text-2xl font-bold mb-4">User Management</h2>
       <button
         onClick={fetchUsers}
@@ -97,7 +97,7 @@ const handleUnrevokeUser = async (userId: string) => {
       >
         Refresh
       </button>
-      <div className="overflow-x-auto rounded shadow bg-white">
+      <div className="overflow-x-auto rounded shadow bg-white dark:bg-black">
         <table className="w-full min-w-full">
           <thead>
             <tr>

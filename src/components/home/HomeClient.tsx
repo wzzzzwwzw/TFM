@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import LoadingQuizzes from "@/components/LoadingQuizzes";
 
 const categories = [
   { name: "Math", img: "/math.png" },
@@ -16,35 +17,22 @@ export default function HomeClient() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
-  const [revoked, setRevoked] = useState<boolean | null>(null);
 
-  // Fetch current user info to check if revoked
+  // Fetch quizzes
   useEffect(() => {
-    fetch("/api/users")
+    setLoading(true);
+    setError(null);
+    fetch("/api/quiz-review")
       .then((res) => res.json())
       .then((data) => {
-        setRevoked(!!data.revoked);
+        setQuizzes(data.quizzes || []);
+        setLoading(false);
       })
-      .catch(() => setRevoked(false)); // fallback: allow access if error
+      .catch(() => {
+        setError("Error loading quizzes.");
+        setLoading(false);
+      });
   }, []);
-
-  // Fetch quizzes only if not revoked
-  useEffect(() => {
-    if (revoked === false) {
-      setLoading(true);
-      setError(null);
-      fetch("/api/quiz-review")
-        .then((res) => res.json())
-        .then((data) => {
-          setQuizzes(data.quizzes || []);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Error loading quizzes.");
-          setLoading(false);
-        });
-    }
-  }, [revoked]);
 
   // Filtering logic for category and difficulty
   const filteredQuizzes = quizzes.filter((quiz: any) => {
@@ -53,26 +41,9 @@ export default function HomeClient() {
     return categoryMatch && difficultyMatch;
   });
 
-  // Show loading while checking revoked status
-  if (revoked === null) {
-    return <div>Loading...</div>;
-  }
-
-  // If revoked, show message and block access
-  if (revoked) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-red-600 text-xl font-bold">
-          Access Denied: Your access to this page has been revoked.
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Available Quizzes</h1>
-
       {/* Category and Difficulty Filters */}
       <div className="mb-6 flex gap-4">
         <label htmlFor="category" className="font-semibold">
@@ -82,7 +53,7 @@ export default function HomeClient() {
           id="category"
           value={selectedCategory || ""}
           onChange={(e) => setSelectedCategory(e.target.value || null)}
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 bg-white dark:bg-black text-gray-900 dark:text-white"
         >
           <option value="">All</option>
           {categories.map((cat) => (
@@ -99,7 +70,7 @@ export default function HomeClient() {
           id="difficulty"
           value={selectedDifficulty || ""}
           onChange={(e) => setSelectedDifficulty(e.target.value || null)}
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 bg-white dark:bg-black text-gray-900 dark:text-white"
         >
           <option value="">All</option>
           <option value="Easy">Easy</option>
@@ -109,7 +80,7 @@ export default function HomeClient() {
       </div>
 
       {/* Loading and Error Messages */}
-      {loading && <div>Loading quizzes...</div>}
+      {loading && <LoadingQuizzes />}
       {error && <div className="text-red-500">{error}</div>}
 
       {/* Quiz List */}
@@ -130,22 +101,24 @@ export default function HomeClient() {
                   className="mb-2 rounded"
                 />
               ) : null}
-              <h2 className="text-xl font-semibold mb-1">{quiz.title}</h2>
-              <div className="text-gray-600 mb-1">
-                Category: {quiz.category}
-              </div>
-              <div className="text-gray-600 mb-1">
-                Difficulty: {quiz.difficulty}
-              </div>
-              <div className="text-gray-600 mb-3">
-                Questions: {quiz.questions?.length || 0}
-              </div>
-              <a
-                href={`/playme/${quiz.id}`}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              >
-                Start Quiz
-              </a>
+            <h2 className="text-2xl font-bold mb-2 text-blue-700 text-center">{quiz.title}</h2>
+<div className="flex flex-wrap gap-2 mb-2 justify-center">
+  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold">
+    Category: {quiz.category}
+  </span>
+  <span className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-xs font-semibold">
+    Difficulty: {quiz.difficulty}
+  </span>
+  <span className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-semibold">
+    Questions: {quiz.questions?.length || 0}
+  </span>
+</div>
+<a
+  href={`/playme/${quiz.id}`}
+  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-semibold mt-2"
+>
+  Start Quiz
+</a>
             </div>
           );
         })}

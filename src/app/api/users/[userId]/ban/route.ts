@@ -21,3 +21,20 @@ export async function POST(
     return NextResponse.json({ error: "Failed to ban user" }, { status: 500 });
   }
 }
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { userId: string } }
+) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: params.userId },
+      select: { banned: true },
+    });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    return NextResponse.json({ banned: user.banned }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+  }
+}

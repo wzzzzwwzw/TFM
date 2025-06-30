@@ -3,8 +3,6 @@ import { prisma } from "@/lib/db";
 import { getAuthSession } from "@/lib/nextauth";
 import { LucideLayoutDashboard } from "lucide-react";
 import Link from "next/link";
-
-
 import { redirect } from "next/navigation";
 import React from "react";
 import ResultsCard from "@/components/statistics/ResultsCard";
@@ -18,9 +16,8 @@ type Props = {
   };
 };
 
-const Statistics = async ( props: Props) => {
-  const params = await props.params;
-  const { gameId } = params;
+const Statistics = async (props: Props) => {
+  const { gameId } = props.params;
   const session = await getAuthSession();
   const isAdmin = session?.user?.isAdmin === true;
   if (!session?.user && !isAdmin) {
@@ -34,23 +31,25 @@ const Statistics = async ( props: Props) => {
     return redirect("/");
   }
 
-  let accuracy: number = 0;
+  let accuracy = 0;
+  const questionCount = game.questions.length;
 
-  if (game.gameType === "mcq") {
+  if (questionCount === 0) {
+    accuracy = 0;
+  } else if (game.gameType === "mcq") {
     let totalCorrect = game.questions.reduce((acc, question) => {
       if (question.isCorrect) {
         return acc + 1;
       }
       return acc;
     }, 0);
-    accuracy = (totalCorrect / game.questions.length) * 100;
+    accuracy = Math.round((totalCorrect / questionCount) * 100 * 100) / 100;
   } else if (game.gameType === "open_ended") {
     let totalPercentage = game.questions.reduce((acc, question) => {
       return acc + (question.percentageCorrect ?? 0);
     }, 0);
-    accuracy = totalPercentage / game.questions.length;
+    accuracy = Math.round((totalPercentage / questionCount) * 100) / 100;
   }
-  accuracy = Math.round(accuracy * 100) / 100;
 
   return (
     <>
@@ -66,8 +65,8 @@ const Statistics = async ( props: Props) => {
         </div>
 
         <div className="grid gap-4 mt-4 md:grid-cols-7">
-          <ResultsCard accuracy={accuracy} />
-          <AccuracyCard accuracy={accuracy} />
+          <ResultsCard accuracy={accuracy}  />
+          <AccuracyCard accuracy={accuracy}  />
           <TimeTakenCard
             timeEnded={new Date(game.timeEnded ?? 0)}
             timeStarted={new Date(game.timeStarted ?? 0)}

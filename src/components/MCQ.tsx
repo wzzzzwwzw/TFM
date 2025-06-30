@@ -42,11 +42,28 @@ const MCQ = ({ game }: Props) => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
 
-  const options = React.useMemo(() => {
-    if (!currentQuestion) return [];
-    if (!currentQuestion.options) return [];
-    return currentQuestion.options as string[];
-  }, [currentQuestion]);
+ const options = React.useMemo(() => {
+  if (!currentQuestion) return [];
+  if (!currentQuestion.options) return [];
+  // If options is a string (JSON), parse it
+  if (typeof currentQuestion.options === "string") {
+    try {
+      const parsed = JSON.parse(currentQuestion.options);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  // If options is already an array
+  if (Array.isArray(currentQuestion.options)) {
+    return currentQuestion.options;
+  }
+  // If options is an object (rare), convert to array
+  return Object.entries(currentQuestion.options)
+    .filter(([key]) => key.startsWith("option"))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, value]) => value);
+}, [currentQuestion]);
   const { toast } = useToast();
   const { mutate: checkAnswer, status: checkAnswerStatus } = useMutation({
     mutationFn: async () => {

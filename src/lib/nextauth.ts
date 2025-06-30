@@ -33,8 +33,22 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+  signIn: "/auth/signin",
+},
   callbacks: {
     
+    async signIn({ user }) {
+      const db_user = await prisma.user.findUnique({
+        where: { email: user.email! },
+        select: { banned: true },
+      });
+      if (db_user?.banned) {
+        // Block sign in for banned users
+        return false;
+      }
+      return true;
+    },
     jwt: async ({ token }) => {
       const db_user = await prisma.user.findFirst({
         where: {
@@ -42,6 +56,7 @@ export const authOptions: NextAuthOptions = {
         },
       });
       if (db_user) {
+        
         token.id = db_user.id;
         token.isAdmin = db_user.isAdmin;
         token.banned = db_user.banned;

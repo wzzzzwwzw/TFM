@@ -51,10 +51,10 @@ export default function QuizList() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow border">
+    <div className="p-4 bg-white dark:bg-black rounded-xl shadow border">
       <div className="mb-4 flex gap-4 items-center">
         <select
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 bg-white dark:bg-black text-gray-900 dark:text-white"
           value={category}
           onChange={e => setCategory(e.target.value)}
         >
@@ -62,7 +62,7 @@ export default function QuizList() {
           {categories.map(cat => <option key={cat}>{cat}</option>)}
         </select>
         <select
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 bg-white dark:bg-black text-gray-900 dark:text-white"
           value={difficulty}
           onChange={e => setDifficulty(e.target.value)}
         >
@@ -77,7 +77,7 @@ export default function QuizList() {
         <div className="overflow-x-auto">
           <table className="min-w-full border rounded-lg">
             <thead>
-              <tr className="bg-blue-100">
+              <tr className="bg-blue-100 dark:bg-blue-900">
                 <th className="p-2 border">#</th>
                 <th className="p-2 border text-left">Title</th>
                 <th className="p-2 border text-left">Category</th>

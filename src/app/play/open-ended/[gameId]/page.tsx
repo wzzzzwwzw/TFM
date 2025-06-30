@@ -11,9 +11,7 @@ type Props = {
 };
 
 const OpenEndedPage = async (props: Props) => {
-  const { params } = await props;
-  const { gameId } = params;
-
+  const { gameId } = await props.params;
   const session = await getAuthSession();
   const isAdmin = session?.user?.isAdmin === true;
   if (!session?.user && !isAdmin) {
