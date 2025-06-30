@@ -11,6 +11,8 @@ type User = {
   isAdmin?: boolean;
 };
 
+const DEVELOPER_EMAIL = "waelwzwz@gmail.com"; 
+
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,23 +50,23 @@ const UserManagement = () => {
     await fetch(`/api/users/${userId}/unban`, { method: "POST" });
     fetchUsers();
   };
-const handleRevokeUser = async (userId: string) => {
-  await fetch(`/api/users/${userId}/revoke`, { method: "POST" });
-  setUsers((prev) =>
-    prev.map((u) =>
-      u.id === userId ? { ...u, revoked: true } : u
-    )
-  );
-};
+  const handleRevokeUser = async (userId: string) => {
+    await fetch(`/api/users/${userId}/revoke`, { method: "POST" });
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId ? { ...u, revoked: true } : u
+      )
+    );
+  };
 
-const handleUnrevokeUser = async (userId: string) => {
-  await fetch(`/api/users/${userId}/unrevoke`, { method: "POST" });
-  setUsers((prev) =>
-    prev.map((u) =>
-      u.id === userId ? { ...u, revoked: false } : u
-    )
-  );
-};
+  const handleUnrevokeUser = async (userId: string) => {
+    await fetch(`/api/users/${userId}/unrevoke`, { method: "POST" });
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId ? { ...u, revoked: false } : u
+      )
+    );
+  };
 
   const handleAssignAdmin = async (userId: string) => {
     await fetch(`/api/users/${userId}/assign-admin`, { method: "POST" });
@@ -147,43 +149,48 @@ const handleUnrevokeUser = async (userId: string) => {
                   )}
                 </td>
                 <td className="py-4 px-4 space-x-2">
-                  {!user.isAdmin && (
-                    <button
-                      onClick={() => handleAssignAdmin(user.id)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      Assign Admin
-                    </button>
-                  )}
-                  {user.revoked ? (
-                    <button
-                      onClick={() => handleUnrevokeUser(user.id)}
-                      className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                    >
-                      Unrevoke
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleRevokeUser(user.id)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                    >
-                      Revoke
-                    </button>
-                  )}
-                  {user.banned ? (
-                    <button
-                      onClick={() => handleUnbanUser(user.id)}
-                      className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                    >
-                      Unban
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleBanUser(user.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    >
-                      Ban
-                    </button>
+                  {/* Hide actions for developer email */}
+                  {user.email !== DEVELOPER_EMAIL && (
+                    <>
+                      {!user.isAdmin && (
+                        <button
+                          onClick={() => handleAssignAdmin(user.id)}
+                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                        >
+                          Assign Admin
+                        </button>
+                      )}
+                      {user.revoked ? (
+                        <button
+                          onClick={() => handleUnrevokeUser(user.id)}
+                          className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                        >
+                          Unrevoke
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleRevokeUser(user.id)}
+                          className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                        >
+                          Revoke
+                        </button>
+                      )}
+                      {user.banned ? (
+                        <button
+                          onClick={() => handleUnbanUser(user.id)}
+                          className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                        >
+                          Unban
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBanUser(user.id)}
+                          className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                        >
+                          Ban
+                        </button>
+                      )}
+                    </>
                   )}
                 </td>
               </tr>
