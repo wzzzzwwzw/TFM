@@ -1,4 +1,4 @@
-name: SonarCloud
+name: SonarCloudAdd commentMore actions
 on:
   push:
     branches:
@@ -17,32 +17,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Set environment variables
-        run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-      - name: Check OPENAI_API_KEY presence
-        run: |
-           if (-not $env:OPENAI_API_KEY) { Write-Host "OPENAI_API_KEY is not set!"; exit 1 } else { Write-Host "OPENAI_API_KEY is set." }
-        shell: pwsh
       - name: Install dependencies
         run: npm ci
       - name: Build project
         run: npm run build
-      - name: Start backend
-        run: npm run start:test &
-      - name: Wait for backend
-        run: npx wait-on http://localhost:3000
       - name: Run tests and collect coverage
         run: npm run test -- --coverage
-      - name: List coverage files
-        run: dir coverage
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
           args: >
-            -Dsonar.projectKey=wzzzzwwzw_TFM
-            -Dsonar.organization=wzzzzwwzw
+            -Dsonar.projectKey=wzzzzwwzw_TFM>
+            -Dsonar.organization=<wzzzzwwzw>
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
