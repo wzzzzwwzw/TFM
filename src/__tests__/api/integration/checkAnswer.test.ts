@@ -1,7 +1,7 @@
 import request from "supertest";
 import { prisma } from "@/lib/db";
 
-const baseUrl = "http://localhost:3000";
+const baseUrl = "http://localhost:3001";
 
 describe("/api/checkAnswer integration", () => {
   let mcqQuestion: any;
