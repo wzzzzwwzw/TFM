@@ -26,6 +26,8 @@ jobs:
         run: npm run build
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - name: Use test environment
+        run: copy .env.test .env
       - name: Run tests and collect coverage
         run: npm run test -- --coverage
       - name: SonarCloud Scan
