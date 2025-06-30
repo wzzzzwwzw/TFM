@@ -1,8 +1,9 @@
 "use client";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import SignInButton from "@/components/SignInButton";
 
-export default function SignInPage() {
+function SignInInner() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
@@ -17,5 +18,13 @@ export default function SignInPage() {
       {errorMessage && <div className="mb-4 text-red-600">{errorMessage}</div>}
       <SignInButton text="Sign in with Google" />
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense>
+      <SignInInner />
+    </Suspense>
   );
 }
