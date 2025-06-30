@@ -28,6 +28,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - name: Use test environment
         run: copy .env.test .env
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:3000
       - name: Run tests and collect coverage
         run: npm run test -- --coverage
       - name: SonarCloud Scan
