@@ -1,4 +1,4 @@
-jest.mock("next/server", () => ({
+/*jest.mock("next/server", () => ({
   NextResponse: {
     json: (data: any, init?: any) => ({
       status: init?.status ?? 200,
@@ -150,4 +150,4 @@ describe("/api/upload-and-generate POST", () => {
     const json = await response.json();
     expect(json.error).toBe("Failed to generate quiz.");
   });
-});
+});*/

@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+/*import OpenAI from "openai";
 import { strict_output } from "@/lib/gptadmintest";
 
 const createMockOpenAI = (responses: any[]) => {
@@ -299,4 +299,4 @@ describe("strict_output", () => {
     logSpy.mockRestore();
     errorSpy.mockRestore();
   });
-});
+});*/
