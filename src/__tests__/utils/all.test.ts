@@ -3,7 +3,7 @@ import { cn, formatTimeDelta, normalize, similarity, calculateAccuracy } from '.
 describe('cn', () => {
   it('merges class names correctly', () => {
     expect(cn('a', 'b', 'c')).toBe('a b c');
-    expect(cn('a', false && 'b', 'c')).toBe('a c');
+    expect(cn('a', false, 'c')).toBe('a c');
     expect(cn('a', undefined, 'b')).toBe('a b');
   });
 });
