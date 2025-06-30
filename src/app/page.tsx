@@ -11,7 +11,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/db";
 export default async function Home() {
   const session = await getServerSession();
-   if (session?.user) {
+  if (session?.user) {
     // Fetch user from DB to check banned status
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },

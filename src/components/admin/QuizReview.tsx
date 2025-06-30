@@ -19,7 +19,9 @@ export default function QuizReview({
   const [editQ, setEditQ] = useState("");
   const [editA, setEditA] = useState("");
 
-  const questions = Array.isArray(editedQuiz?.questions) ? editedQuiz.questions : [];
+  const questions = Array.isArray(editedQuiz?.questions)
+    ? editedQuiz.questions
+    : [];
 
   const handleEdit = (idx: number) => {
     setEditIdx(idx);
@@ -55,7 +57,7 @@ export default function QuizReview({
           <input
             className="border rounded px-2 py-1"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter quiz title"
           />
         </div>
@@ -64,9 +66,9 @@ export default function QuizReview({
           <select
             className="border rounded px-2 py-1"
             value={category}
-            onChange={e => setCategory(e.target.value)}
+            onChange={(e) => setCategory(e.target.value)}
           >
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <option key={cat}>{cat}</option>
             ))}
           </select>
@@ -76,9 +78,9 @@ export default function QuizReview({
           <select
             className="border rounded px-2 py-1"
             value={difficulty}
-            onChange={e => setDifficulty(e.target.value)}
+            onChange={(e) => setDifficulty(e.target.value)}
           >
-            {difficulties.map(diff => (
+            {difficulties.map((diff) => (
               <option key={diff}>{diff}</option>
             ))}
           </select>
@@ -103,7 +105,7 @@ export default function QuizReview({
                     <input
                       className="border rounded px-2 py-1 w-full"
                       value={editQ}
-                      onChange={e => setEditQ(e.target.value)}
+                      onChange={(e) => setEditQ(e.target.value)}
                     />
                   ) : (
                     q.question
@@ -114,7 +116,7 @@ export default function QuizReview({
                     <input
                       className="border rounded px-2 py-1 w-full"
                       value={editA}
-                      onChange={e => setEditA(e.target.value)}
+                      onChange={(e) => setEditA(e.target.value)}
                     />
                   ) : (
                     q.answer

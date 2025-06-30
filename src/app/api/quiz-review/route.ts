@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ quiz }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to save quiz", details: error }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save quiz", details: error },
+      { status: 500 },
+    );
   }
 }
 
@@ -79,6 +82,9 @@ export async function DELETE(req: NextRequest) {
     });
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to delete quiz" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete quiz" },
+      { status: 500 },
+    );
   }
 }

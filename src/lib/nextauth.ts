@@ -12,9 +12,9 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      isAdmin?: boolean; 
+      isAdmin?: boolean;
       banned?: boolean;
-      revoked?: boolean; 
+      revoked?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -22,9 +22,9 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    isAdmin?: boolean; 
-    banned?: boolean; 
-    revoked?: boolean; 
+    isAdmin?: boolean;
+    banned?: boolean;
+    revoked?: boolean;
   }
 }
 
@@ -34,10 +34,9 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-  signIn: "/auth/signin",
-},
+    signIn: "/auth/signin",
+  },
   callbacks: {
-    
     async signIn({ user }) {
       const db_user = await prisma.user.findUnique({
         where: { email: user.email! },
@@ -56,7 +55,6 @@ export const authOptions: NextAuthOptions = {
         },
       });
       if (db_user) {
-        
         token.id = db_user.id;
         token.isAdmin = db_user.isAdmin;
         token.banned = db_user.banned;

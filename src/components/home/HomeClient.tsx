@@ -16,7 +16,9 @@ export default function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(
+    null,
+  );
 
   // Fetch quizzes
   useEffect(() => {
@@ -36,8 +38,10 @@ export default function HomeClient() {
 
   // Filtering logic for category and difficulty
   const filteredQuizzes = quizzes.filter((quiz: any) => {
-    const categoryMatch = !selectedCategory || quiz.category === selectedCategory;
-    const difficultyMatch = !selectedDifficulty || quiz.difficulty === selectedDifficulty;
+    const categoryMatch =
+      !selectedCategory || quiz.category === selectedCategory;
+    const difficultyMatch =
+      !selectedDifficulty || quiz.difficulty === selectedDifficulty;
     return categoryMatch && difficultyMatch;
   });
 
@@ -101,24 +105,26 @@ export default function HomeClient() {
                   className="mb-2 rounded"
                 />
               ) : null}
-            <h2 className="text-2xl font-bold mb-2 text-blue-700 text-center">{quiz.title}</h2>
-<div className="flex flex-wrap gap-2 mb-2 justify-center">
-  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold">
-    Category: {quiz.category}
-  </span>
-  <span className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-xs font-semibold">
-    Difficulty: {quiz.difficulty}
-  </span>
-  <span className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-semibold">
-    Questions: {quiz.questions?.length || 0}
-  </span>
-</div>
-<a
-  href={`/playme/${quiz.id}`}
-  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-semibold mt-2"
->
-  Start Quiz
-</a>
+              <h2 className="text-2xl font-bold mb-2 text-blue-700 text-center">
+                {quiz.title}
+              </h2>
+              <div className="flex flex-wrap gap-2 mb-2 justify-center">
+                <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold">
+                  Category: {quiz.category}
+                </span>
+                <span className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-xs font-semibold">
+                  Difficulty: {quiz.difficulty}
+                </span>
+                <span className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-semibold">
+                  Questions: {quiz.questions?.length || 0}
+                </span>
+              </div>
+              <a
+                href={`/playme/${quiz.id}`}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-semibold mt-2"
+              >
+                Start Quiz
+              </a>
             </div>
           );
         })}

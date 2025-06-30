@@ -18,10 +18,11 @@ export async function strict_output(
   temperature: number = 1,
   num_tries: number = 3,
   verbose: boolean = false,
-  openaiClient?: OpenAI  // <-- injected client
+  openaiClient?: OpenAI, // <-- injected client
 ): Promise<{ question: string; answer: string }[]> {
   // Use provided client or create new one
-  const openai = openaiClient ?? new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const openai =
+    openaiClient ?? new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const isListInput = Array.isArray(user_prompt);
   const hasDynamicElements = /<.*?>/.test(JSON.stringify(output_format));
@@ -53,7 +54,9 @@ export async function strict_output(
         },
         {
           role: "user",
-          content: isListInput ? JSON.stringify(user_prompt) : String(user_prompt),
+          content: isListInput
+            ? JSON.stringify(user_prompt)
+            : String(user_prompt),
         },
       ],
     });
@@ -61,7 +64,10 @@ export async function strict_output(
     let content = response.choices[0].message?.content ?? "";
 
     if (verbose) {
-      console.log("=== System prompt ===\n", system_prompt + formatPrompt + errorMsg);
+      console.log(
+        "=== System prompt ===\n",
+        system_prompt + formatPrompt + errorMsg,
+      );
       console.log("=== User prompt ===\n", user_prompt);
       console.log("=== GPT raw output ===\n", content);
     }

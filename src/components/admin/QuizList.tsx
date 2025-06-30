@@ -19,8 +19,10 @@ export default function QuizList() {
     if (difficulty) params.append("difficulty", difficulty);
 
     fetch(`/api/quiz-review?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => setQuizzes(Array.isArray(data.quizzes) ? data.quizzes : []))
+      .then((res) => res.json())
+      .then((data) =>
+        setQuizzes(Array.isArray(data.quizzes) ? data.quizzes : []),
+      )
       .catch(() => setError("Failed to load quizzes."))
       .finally(() => setLoading(false));
   }, [category, difficulty]);
@@ -39,7 +41,7 @@ export default function QuizList() {
           method: "DELETE",
         });
         if (res.ok) {
-          setQuizzes(qs => qs.filter(q => q.id !== quiz.id));
+          setQuizzes((qs) => qs.filter((q) => q.id !== quiz.id));
         } else {
           const data = await res.json();
           alert(data.error || "Failed to delete quiz.");
@@ -56,18 +58,22 @@ export default function QuizList() {
         <select
           className="border rounded px-2 py-1 bg-white dark:bg-black text-gray-900 dark:text-white"
           value={category}
-          onChange={e => setCategory(e.target.value)}
+          onChange={(e) => setCategory(e.target.value)}
         >
           <option value="">All Categories</option>
-          {categories.map(cat => <option key={cat}>{cat}</option>)}
+          {categories.map((cat) => (
+            <option key={cat}>{cat}</option>
+          ))}
         </select>
         <select
           className="border rounded px-2 py-1 bg-white dark:bg-black text-gray-900 dark:text-white"
           value={difficulty}
-          onChange={e => setDifficulty(e.target.value)}
+          onChange={(e) => setDifficulty(e.target.value)}
         >
           <option value="">All Difficulties</option>
-          {difficulties.map(diff => <option key={diff}>{diff}</option>)}
+          {difficulties.map((diff) => (
+            <option key={diff}>{diff}</option>
+          ))}
         </select>
       </div>
       {loading && <div>Loading quizzes...</div>}
@@ -99,7 +105,6 @@ export default function QuizList() {
                       : 0}
                   </td>
                   <td className="p-2 border text-center space-x-2">
-                  
                     <button
                       className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                       onClick={() => handleDelete(quiz)}

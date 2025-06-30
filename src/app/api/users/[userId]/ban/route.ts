@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/nextauth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.isAdmin) {
@@ -23,7 +23,7 @@ export async function POST(
 }
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   try {
     const user = await prisma.user.findUnique({
@@ -35,6 +35,9 @@ export async function GET(
     }
     return NextResponse.json({ banned: user.banned }, { status: 200 });
   } catch {
-    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch user" },
+      { status: 500 },
+    );
   }
 }

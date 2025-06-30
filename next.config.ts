@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: "standalone",
-  webpack(config: any) { // <-- añade ': any' aquí para evitar el warning
+  webpack(config: any) {
+    // <-- añade ': any' aquí para evitar el warning
     config.module.rules.push({
       test: /\.svg$/,
       issuer: /\.[jt]sx?$/,

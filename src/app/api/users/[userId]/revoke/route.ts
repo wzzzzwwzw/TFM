@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/nextauth";
 
 export async function POST(
   req: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: { userId: string } },
 ) {
   const { params } = context;
   const session = await getServerSession(authOptions);
@@ -22,12 +22,15 @@ export async function POST(
     }
     return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: "Failed to revoke user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to revoke user" },
+      { status: 500 },
+    );
   }
 }
 export async function GET(
   req: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: { userId: string } },
 ) {
   const { params } = context;
   try {
@@ -40,6 +43,9 @@ export async function GET(
     }
     return NextResponse.json({ revoked: user.revoked }, { status: 200 });
   } catch {
-    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch user" },
+      { status: 500 },
+    );
   }
 }

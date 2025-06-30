@@ -8,7 +8,10 @@ const QuizCategories = () => {
     { name: "Mathematics", difficulty: "Hard" },
   ]);
 
-  const [newCategory, setNewCategory] = useState({ name: "", difficulty: "Easy" });
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    difficulty: "Easy",
+  });
 
   const handleAddCategory = () => {
     if (newCategory.name) {
@@ -25,19 +28,26 @@ const QuizCategories = () => {
           type="text"
           placeholder="Category Name"
           value={newCategory.name}
-          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+          onChange={(e) =>
+            setNewCategory({ ...newCategory, name: e.target.value })
+          }
           className="border p-2 mr-2"
         />
         <select
           value={newCategory.difficulty}
-          onChange={(e) => setNewCategory({ ...newCategory, difficulty: e.target.value })}
+          onChange={(e) =>
+            setNewCategory({ ...newCategory, difficulty: e.target.value })
+          }
           className="border p-2 mr-2"
         >
           <option value="Easy">Easy</option>
           <option value="Medium">Medium</option>
           <option value="Hard">Hard</option>
         </select>
-        <button onClick={handleAddCategory} className="bg-blue-500 text-white p-2">
+        <button
+          onClick={handleAddCategory}
+          className="bg-blue-500 text-white p-2"
+        >
           Add Category
         </button>
       </div>

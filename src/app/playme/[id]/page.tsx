@@ -35,9 +35,9 @@ export default function QuizPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-      fetch(`/api/start-quiz/${quizId}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(`/api/start-quiz/${quizId}`)
+      .then((res) => res.json())
+      .then((data) => {
         if (data && Array.isArray(data.quizzes) && data.quizzes.length > 0) {
           setQuiz(data.quizzes[0]);
           setUserAnswers(Array(data.quizzes[0].questions.length).fill(""));
@@ -52,13 +52,13 @@ export default function QuizPage() {
   // Save the user's quiz attempt to the database
   async function saveQuizAttempt() {
     // Get the user session (adjust if you use a different auth system)
-    const session = await fetch("/api/auth/session").then(res => res.json());
+    const session = await fetch("/api/auth/session").then((res) => res.json());
     if (!session?.user?.id) return;
 
     // Calculate score
     const correctCount = quiz!.questions.reduce(
       (acc, q, i) => acc + (isAnswerCorrect(userAnswers[i], q.answer) ? 1 : 0),
-      0
+      0,
     );
     const score = (correctCount / quiz!.questions.length) * 100;
 
@@ -76,7 +76,7 @@ export default function QuizPage() {
   }
 
   const handleInput = (val: string) => {
-    setUserAnswers(prev => {
+    setUserAnswers((prev) => {
       const copy = [...prev];
       copy[current] = val;
       return copy;
@@ -139,7 +139,7 @@ export default function QuizPage() {
             className="border px-3 py-2 rounded w-full mb-2"
             placeholder="Type your answer..."
             value={userAnswers[current] || ""}
-            onChange={e => handleInput(e.target.value)}
+            onChange={(e) => handleInput(e.target.value)}
           />
           <div className="flex gap-2">
             <button
@@ -161,16 +161,26 @@ export default function QuizPage() {
       ) : (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white p-8 rounded shadow text-center max-w-xl w-full">
-            <h2 className="text-2xl font-bold mb-4 text-blue-700">Quiz Finished!</h2>
+            <h2 className="text-2xl font-bold mb-4 text-blue-700">
+              Quiz Finished!
+            </h2>
             <p className="mb-4">Here are your results:</p>
             <ul className="text-left mb-4">
               {quiz.questions.map((q, i) => (
                 <li key={i} className="mb-2">
-                  <span className="font-semibold">{i + 1}. {q.question}</span>
+                  <span className="font-semibold">
+                    {i + 1}. {q.question}
+                  </span>
                   <br />
                   <span>
                     Your answer:{" "}
-                    <span className={isAnswerCorrect(userAnswers[i], q.answer) ? "text-green-700 font-bold" : "text-red-700 font-bold"}>
+                    <span
+                      className={
+                        isAnswerCorrect(userAnswers[i], q.answer)
+                          ? "text-green-700 font-bold"
+                          : "text-red-700 font-bold"
+                      }
+                    >
                       {userAnswers[i] || <em>No answer</em>}
                     </span>
                   </span>

@@ -26,13 +26,13 @@ const DetailsDialog = () => {
           <DialogDescription asChild>
             <div>
               <div className="my-2 mt-4">
-                <strong>QuizUPM</strong> is an AI-powered quiz platform developed
-                as part of my Master’s Final Project (TFM) at Universidad
-                Politécnica de Madrid. The goal is to make learning more
-                interactive, adaptive, and effective for students and educators.
-                QuizUPM leverages modern web technologies and artificial
-                intelligence to generate, evaluate, and personalize quizzes for a
-                smarter educational experience.
+                <strong>QuizUPM</strong> is an AI-powered quiz platform
+                developed as part of my Master’s Final Project (TFM) at
+                Universidad Politécnica de Madrid. The goal is to make learning
+                more interactive, adaptive, and effective for students and
+                educators. QuizUPM leverages modern web technologies and
+                artificial intelligence to generate, evaluate, and personalize
+                quizzes for a smarter educational experience.
               </div>
               <div className="my-2">
                 <span>

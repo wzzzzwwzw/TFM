@@ -5,7 +5,7 @@ import { getAuthSession } from "@/lib/nextauth";
 const AdminPage = async () => {
   const session = await getAuthSession();
   if (!session?.user?.isAdmin) {
-    redirect("/"); 
+    redirect("/");
   }
   return <AdminDashboardClient />;
 };

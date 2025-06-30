@@ -12,10 +12,10 @@ function buildOutputFormatPrompt(
   output_format: OutputFormat,
   list_output: boolean,
   dynamic_elements: boolean,
-  list_input: boolean
+  list_input: boolean,
 ) {
   let prompt = `\nYou are to output the following in json format: ${JSON.stringify(
-    output_format
+    output_format,
   )}. \nDo not put quotation marks or escape character \\ in the output fields.`;
 
   if (list_output) {
@@ -36,7 +36,7 @@ function buildOutputFormatPrompt(
 function normalizeOutputValue(
   value: any,
   choices: string[],
-  default_category: string
+  default_category: string,
 ) {
   if (Array.isArray(value)) {
     value = value[0];
@@ -55,7 +55,7 @@ function validateAndNormalizeOutput(
   output_format: OutputFormat,
   default_category: string,
   output_value_only: boolean,
-  list_input: boolean
+  list_input: boolean,
 ) {
   const outputArr = list_input ? output : [output];
   for (let index = 0; index < outputArr.length; index++) {
@@ -69,7 +69,7 @@ function validateAndNormalizeOutput(
         outputArr[index][key] = normalizeOutputValue(
           outputArr[index][key],
           output_format[key] as string[],
-          default_category
+          default_category,
         );
       }
     }
@@ -85,11 +85,11 @@ function validateAndNormalizeOutput(
 
 function escapeInnerQuotes(jsonStr: string): string {
   let inString = false;
-  let prevChar = '';
-  let result = '';
+  let prevChar = "";
+  let result = "";
   for (let i = 0; i < jsonStr.length; i++) {
     const char = jsonStr[i];
-    if (char === '"' && prevChar !== '\\') {
+    if (char === '"' && prevChar !== "\\") {
       inString = !inString;
       result += char;
     } else {
@@ -114,7 +114,7 @@ export async function strict_output(
   model: string = "gpt-3.5-turbo",
   temperature: number = 1,
   num_tries: number = 3,
-  verbose: boolean = false
+  verbose: boolean = false,
 ): Promise<
   {
     question: string;
@@ -123,8 +123,12 @@ export async function strict_output(
 > {
   const list_input = Array.isArray(user_prompt);
   // SAFE: Avoid regex, just check for both chars
-  const dynamic_elements = JSON.stringify(output_format).includes("<") && JSON.stringify(output_format).includes(">");
-  const list_output = JSON.stringify(output_format).includes("[") && JSON.stringify(output_format).includes("]");
+  const dynamic_elements =
+    JSON.stringify(output_format).includes("<") &&
+    JSON.stringify(output_format).includes(">");
+  const list_output =
+    JSON.stringify(output_format).includes("[") &&
+    JSON.stringify(output_format).includes("]");
   let error_msg = "";
 
   for (let i = 0; i < num_tries; i++) {
@@ -132,7 +136,7 @@ export async function strict_output(
       output_format,
       list_output,
       dynamic_elements,
-      list_input
+      list_input,
     );
     const response = await openai.chat.completions.create({
       temperature,
@@ -169,7 +173,7 @@ export async function strict_output(
     if (verbose) {
       console.log(
         "System prompt:",
-        system_prompt + output_format_prompt + error_msg
+        system_prompt + output_format_prompt + error_msg,
       );
       console.log("\nUser prompt:", user_prompt);
       console.log("\nGPT response:", res);
@@ -185,7 +189,7 @@ export async function strict_output(
         output_format,
         default_category,
         output_value_only,
-        list_input
+        list_input,
       );
     } catch (e) {
       error_msg = `\n\nResult: ${res}\n\nError message: ${e}`;

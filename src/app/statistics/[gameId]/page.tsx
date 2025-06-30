@@ -65,8 +65,8 @@ const Statistics = async (props: Props) => {
         </div>
 
         <div className="grid gap-4 mt-4 md:grid-cols-7">
-          <ResultsCard accuracy={accuracy}  />
-          <AccuracyCard accuracy={accuracy}  />
+          <ResultsCard accuracy={accuracy} />
+          <AccuracyCard accuracy={accuracy} />
           <TimeTakenCard
             timeEnded={new Date(game.timeEnded ?? 0)}
             timeStarted={new Date(game.timeStarted ?? 0)}

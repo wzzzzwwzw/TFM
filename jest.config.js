@@ -1,8 +1,8 @@
-require('dotenv/config');
+require("dotenv/config");
 
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "node",  // changed to jsdom for React Testing Library
+  testEnvironment: "node", // changed to jsdom for React Testing Library
   testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",

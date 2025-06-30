@@ -19,7 +19,8 @@ const RevokedPage = async () => {
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-3xl font-bold text-red-600 mb-4">Acceso revocado</h1>
       <p className="text-lg text-gray-700">
-        Tu acceso a la plataforma ha sido revocado. Si crees que esto es un error, por favor contacta con el administrador.
+        Tu acceso a la plataforma ha sido revocado. Si crees que esto es un
+        error, por favor contacta con el administrador.
       </p>
     </div>
   );

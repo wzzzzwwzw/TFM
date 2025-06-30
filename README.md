@@ -36,11 +36,11 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 flowchart TD
-    User[Usuario]
-    FE[Frontend (Next.js/React)]
-    API[API REST (Next.js)]
-    DB[Base de datos (Prisma + MySQL)]
-    AI[OpenAI API]
+User[Usuario]
+FE[Frontend (Next.js/React)]
+API[API REST (Next.js)]
+DB[Base de datos (Prisma + MySQL)]
+AI[OpenAI API]
 
     User --> FE
     FE --> API

@@ -10,8 +10,8 @@ type Props = {
   };
 };
 
-const MCQPage = async ( props : Props) => {
-  const  params  = await props.params;
+const MCQPage = async (props: Props) => {
+  const params = await props.params;
   const { gameId } = params;
 
   const session = await getAuthSession();
@@ -25,7 +25,7 @@ const MCQPage = async ( props : Props) => {
       id: gameId,
     },
     include: {
-      questions: { 
+      questions: {
         select: {
           id: true,
           question: true,

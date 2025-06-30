@@ -12,10 +12,10 @@ type Props = {};
 
 const History = async (props: Props) => {
   const session = await getAuthSession();
-const isAdmin = session?.user?.isAdmin === true;
-   if (!session?.user && !isAdmin) {
-     redirect("/");
-   }
+  const isAdmin = session?.user?.isAdmin === true;
+  if (!session?.user && !isAdmin) {
+    redirect("/");
+  }
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 w-[400px]">
       <Card>

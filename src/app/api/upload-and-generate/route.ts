@@ -9,18 +9,21 @@ export const config = {
 };
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
   if (!session?.user?.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-    const contentType = req.headers.get("content-type") || "";
+  const contentType = req.headers.get("content-type") || "";
   if (
     !contentType.startsWith("multipart/form-data") &&
     !contentType.startsWith("application/x-www-form-urlencoded")
   ) {
     return NextResponse.json(
-      { error: "Content-Type must be multipart/form-data or application/x-www-form-urlencoded." },
-      { status: 400 }
+      {
+        error:
+          "Content-Type must be multipart/form-data or application/x-www-form-urlencoded.",
+      },
+      { status: 400 },
     );
   }
   const formData = await req.formData();
@@ -37,7 +40,10 @@ export async function POST(req: NextRequest) {
     !file.name.endsWith(".json") &&
     !file.name.endsWith(".txt")
   ) {
-    return NextResponse.json({ error: "Only JSON or TXT files are accepted." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Only JSON or TXT files are accepted." },
+      { status: 400 },
+    );
   }
 
   const text = await file.text();
@@ -47,12 +53,19 @@ export async function POST(req: NextRequest) {
     try {
       const jsonData = JSON.parse(text);
       // Try to extract course content from common fields, or fallback to the whole JSON string
-      courseContent = jsonData.content || jsonData.text || JSON.stringify(jsonData) || "";
+      courseContent =
+        jsonData.content || jsonData.text || JSON.stringify(jsonData) || "";
       if (!courseContent) {
-        return NextResponse.json({ error: "No course content found in JSON." }, { status: 400 });
+        return NextResponse.json(
+          { error: "No course content found in JSON." },
+          { status: 400 },
+        );
       }
     } catch {
-      return NextResponse.json({ error: "Invalid JSON file." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid JSON file." },
+        { status: 400 },
+      );
     }
   } else {
     // Plain text file
@@ -61,7 +74,10 @@ export async function POST(req: NextRequest) {
 
   // Validate course content length
   if (!courseContent || courseContent.trim().length < 10) {
-    return NextResponse.json({ error: "Course content is too short or missing." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Course content is too short or missing." },
+      { status: 400 },
+    );
   }
 
   console.log("File name:", file.name);
@@ -83,7 +99,7 @@ If you cannot generate a question or answer, use an empty string for that field.
 
   const output_format = {
     question: "",
-    answer: ""
+    answer: "",
   };
 
   try {
@@ -96,11 +112,14 @@ If you cannot generate a question or answer, use an empty string for that field.
       "gpt-3.5-turbo",
       0,
       3,
-      false
+      false,
     );
     if (!Array.isArray(questions)) questions = [questions];
     return NextResponse.json({ questions });
   } catch (e) {
-    return NextResponse.json({ questions: [], error: "Failed to generate quiz." }, { status: 500 });
+    return NextResponse.json(
+      { questions: [], error: "Failed to generate quiz." },
+      { status: 500 },
+    );
   }
 }

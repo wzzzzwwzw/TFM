@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/nextauth";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.isAdmin) {
@@ -21,6 +21,9 @@ export async function POST(
     });
     return NextResponse.json({ success: true, user }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to assign admin role." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to assign admin role." },
+      { status: 500 },
+    );
   }
 }

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
           success: false,
           error: "Usuario no encontrado para cerrar sesión.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
           success: false,
           error: "No se pudo conectar con la base de datos.",
         },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         success: false,
         error: "Error inesperado al cerrar sesión.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

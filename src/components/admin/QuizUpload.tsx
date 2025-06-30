@@ -92,7 +92,7 @@ const QuizUpload = ({ onQuizReady }: QuizUploadProps) => {
         `}
         onClick={handleButtonClick}
         onDrop={handleDrop}
-        onDragOver={e => e.preventDefault()}
+        onDragOver={(e) => e.preventDefault()}
         style={{ cursor: "pointer" }}
       >
         <input
@@ -114,9 +114,11 @@ const QuizUpload = ({ onQuizReady }: QuizUploadProps) => {
         onClick={handleUpload}
         disabled={uploading || !file}
         className={`w-full max-w-md py-2 rounded-lg font-bold transition-colors
-          ${uploading || !file
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600"}
+          ${
+            uploading || !file
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600"
+          }
         `}
       >
         {uploading ? "Uploading..." : "Upload & Generate"}

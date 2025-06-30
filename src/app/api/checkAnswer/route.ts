@@ -18,7 +18,7 @@ export async function POST(req: Request, res: Response) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     await prisma.question.update({
@@ -36,25 +36,25 @@ export async function POST(req: Request, res: Response) {
         isCorrect,
       });
     } else if (question.questionType === "open_ended") {
-  let percentageSimilar = stringSimilarity.compareTwoStrings(
-    question.answer.toLowerCase().trim(),
-    userInput.toLowerCase().trim()
-  );
-  // Set a threshold (e.g., 0.5 = 50%)
-  const threshold = 0.8;
-  if (percentageSimilar < threshold) {
-    percentageSimilar = 0;
-  } else {
-    percentageSimilar = Math.round(percentageSimilar * 100);
-  }
-  await prisma.question.update({
-    where: { id: questionId },
-    data: { percentageCorrect: percentageSimilar },
-  });
-  return NextResponse.json({
-    percentageSimilar,
-  });
-}
+      let percentageSimilar = stringSimilarity.compareTwoStrings(
+        question.answer.toLowerCase().trim(),
+        userInput.toLowerCase().trim(),
+      );
+      // Set a threshold (e.g., 0.5 = 50%)
+      const threshold = 0.8;
+      if (percentageSimilar < threshold) {
+        percentageSimilar = 0;
+      } else {
+        percentageSimilar = Math.round(percentageSimilar * 100);
+      }
+      await prisma.question.update({
+        where: { id: questionId },
+        data: { percentageCorrect: percentageSimilar },
+      });
+      return NextResponse.json({
+        percentageSimilar,
+      });
+    }
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -63,7 +63,7 @@ export async function POST(req: Request, res: Response) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
   }

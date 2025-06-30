@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } },
+) {
   const quizId = params.id;
 
   if (!quizId) {
-    return NextResponse.json({ error: "Quiz ID is required." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Quiz ID is required." },
+      { status: 400 },
+    );
   }
 
   try {
@@ -18,6 +24,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
     return NextResponse.json({ quiz });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to load quiz." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to load quiz." },
+      { status: 500 },
+    );
   }
 }

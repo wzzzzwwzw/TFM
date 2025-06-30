@@ -11,7 +11,7 @@ type User = {
   isAdmin?: boolean;
 };
 
-const DEVELOPER_EMAIL = "waelwzwz@gmail.com"; 
+const DEVELOPER_EMAIL = "waelwzwz@gmail.com";
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -53,18 +53,14 @@ const UserManagement = () => {
   const handleRevokeUser = async (userId: string) => {
     await fetch(`/api/users/${userId}/revoke`, { method: "POST" });
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId ? { ...u, revoked: true } : u
-      )
+      prev.map((u) => (u.id === userId ? { ...u, revoked: true } : u)),
     );
   };
 
   const handleUnrevokeUser = async (userId: string) => {
     await fetch(`/api/users/${userId}/unrevoke`, { method: "POST" });
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId ? { ...u, revoked: false } : u
-      )
+      prev.map((u) => (u.id === userId ? { ...u, revoked: false } : u)),
     );
   };
 
@@ -72,9 +68,7 @@ const UserManagement = () => {
     await fetch(`/api/users/${userId}/assign-admin`, { method: "POST" });
     // Optimistically update UI
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId ? { ...u, isAdmin: true } : u
-      )
+      prev.map((u) => (u.id === userId ? { ...u, isAdmin: true } : u)),
     );
   };
 
@@ -142,7 +136,10 @@ const UserManagement = () => {
                 <td className="py-4 px-4">
                   {user.isAdmin ? (
                     <span className="text-blue-600 font-bold flex items-center gap-1">
-                      Admin <span title="Admin" role="img" aria-label="admin">🛡️</span>
+                      Admin{" "}
+                      <span title="Admin" role="img" aria-label="admin">
+                        🛡️
+                      </span>
                     </span>
                   ) : (
                     <span className="text-gray-500">User</span>

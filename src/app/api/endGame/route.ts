@@ -19,7 +19,7 @@ export async function POST(req: Request, res: Response) {
         },
         {
           status: 404,
-        }
+        },
       );
     }
     await prisma.game.update({
@@ -38,7 +38,7 @@ export async function POST(req: Request, res: Response) {
       {
         message: "Something went wrong",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -13,7 +13,7 @@ export async function POST(req: Request, res: Response) {
         { error: "You must be logged in to create a game." },
         {
           status: 401,
-        }
+        },
       );
     }
     const body = await req.json();
@@ -47,7 +47,7 @@ export async function POST(req: Request, res: Response) {
         amount,
         topic,
         type,
-      }
+      },
     );
 
     if (type === "mcq") {
@@ -103,14 +103,14 @@ export async function POST(req: Request, res: Response) {
         { error: error.issues },
         {
           status: 400,
-        }
+        },
       );
     } else {
       return NextResponse.json(
         { error: "An unexpected error occurred." },
         {
           status: 500,
-        }
+        },
       );
     }
   }
@@ -123,7 +123,7 @@ export async function GET(req: Request, res: Response) {
         { error: "You must be logged in to create a game." },
         {
           status: 401,
-        }
+        },
       );
     }
     const url = new URL(req.url);
@@ -133,7 +133,7 @@ export async function GET(req: Request, res: Response) {
         { error: "You must provide a game id." },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -150,7 +150,7 @@ export async function GET(req: Request, res: Response) {
         { error: "Game not found." },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -158,14 +158,14 @@ export async function GET(req: Request, res: Response) {
       { game },
       {
         status: 400,
-      }
+      },
     );
   } catch (error) {
     return NextResponse.json(
       { error: "An unexpected error occurred." },
       {
         status: 500,
-      }
+      },
     );
   }
 }

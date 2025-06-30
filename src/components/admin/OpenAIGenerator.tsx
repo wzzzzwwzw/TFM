@@ -22,7 +22,11 @@ const OpenAIGenerator = ({ onQuizReady }: OpenAIGeneratorProps) => {
         body: JSON.stringify({ user_prompt: prompt }),
       });
       const data = await res.json();
-      if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+      if (
+        data.questions &&
+        Array.isArray(data.questions) &&
+        data.questions.length > 0
+      ) {
         setQuestions(data.questions);
         onQuizReady({ title: prompt, questions: data.questions });
       } else {

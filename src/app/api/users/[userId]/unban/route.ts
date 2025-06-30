@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/nextauth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.isAdmin) {
@@ -18,6 +18,9 @@ export async function POST(
     });
     return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: "Failed to unban user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to unban user" },
+      { status: 500 },
+    );
   }
 }

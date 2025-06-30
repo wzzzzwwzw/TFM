@@ -35,7 +35,7 @@ const QuestionsList = ({ questions }: Props) => {
           {questions.map(
             (
               { answer, question, userAnswer, percentageCorrect, isCorrect },
-              index
+              index,
             ) => {
               return (
                 <TableRow key={index}>
@@ -66,7 +66,7 @@ const QuestionsList = ({ questions }: Props) => {
                   )}
                 </TableRow>
               );
-            }
+            },
           )}
         </>
       </TableBody>

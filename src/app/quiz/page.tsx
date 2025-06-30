@@ -16,7 +16,7 @@ interface Props {
 
 const Quiz = async ({ searchParams }: Props) => {
   const session = await getAuthSession();
-   if (!session?.user) {
+  if (!session?.user) {
     redirect("/");
   }
   const params = await searchParams;
@@ -24,4 +24,3 @@ const Quiz = async ({ searchParams }: Props) => {
 };
 
 export default Quiz;
-
