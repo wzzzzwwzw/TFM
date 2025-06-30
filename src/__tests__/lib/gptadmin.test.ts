@@ -1,7 +1,6 @@
 import OpenAI from "openai";
-import { strict_output } from "@/lib/gptadmintest"; // adjust import path
+import { strict_output } from "@/lib/gptadmintest";
 
-// Mock OpenAI client
 const createMockOpenAI = (responses: any[]) => {
   let callCount = 0;
   return {
@@ -18,119 +17,106 @@ const createMockOpenAI = (responses: any[]) => {
   } as unknown as OpenAI;
 };
 
+const defaultArgs = [
+  "System prompt",
+  "User prompt",
+  { question: "", answer: "" },
+  "",
+  false,
+  "gpt-3.5-turbo",
+  1,
+];
+
+const runStrictOutputTest = async (
+  responses: any[],
+  args: any[] = defaultArgs,
+  numTries = 1,
+  verbose = false,
+  expected: any,
+  expectedCalls: number,
+) => {
+  const mockOpenAI = createMockOpenAI(responses);
+  const output = await strict_output(
+    ...(args.slice(0, 7) as [any, any, any, any, any, any, any]),
+    numTries,
+    verbose,
+    mockOpenAI
+  );
+  expect(output).toEqual(expected);
+  expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(expectedCalls);
+};
+
 describe("strict_output", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("parses valid JSON output on first try", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([
-                { question: "Q1", answer: "A1" },
-                { question: "Q2", answer: "A2" },
-              ]),
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([
+                  { question: "Q1", answer: "A1" },
+                  { question: "Q2", answer: "A2" },
+                ]),
+              },
             },
-          },
-        ],
-      },
-    ]);
-
-    const output = await strict_output(
-      "System prompt",
-      "User prompt",
-      { question: "", answer: "" },
-      "",
-      false,
-      "gpt-3.5-turbo",
-      1,
+          ],
+        },
+      ],
+      defaultArgs,
       3,
       false,
-      mockOpenAI
+      [
+        { question: "Q1", answer: "A1" },
+        { question: "Q2", answer: "A2" },
+      ],
+      1
     );
-
-    expect(output).toEqual([
-      { question: "Q1", answer: "A1" },
-      { question: "Q2", answer: "A2" },
-    ]);
-    expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(1);
   });
 
   it("retries on JSON parse error and eventually returns empty array", async () => {
-    const mockOpenAI = createMockOpenAI([
-      { choices: [{ message: { content: "bad json 1" } }] },
-      { choices: [{ message: { content: "bad json 2" } }] },
-      { choices: [{ message: { content: "bad json 3" } }] },
-    ]);
-
-    const output = await strict_output(
-      "System prompt",
-      "User prompt",
-      { question: "", answer: "" },
-      "",
-      false,
-      "gpt-3.5-turbo",
-      1,
+    await runStrictOutputTest(
+      [
+        { choices: [{ message: { content: "bad json 1" } }] },
+        { choices: [{ message: { content: "bad json 2" } }] },
+        { choices: [{ message: { content: "bad json 3" } }] },
+      ],
+      defaultArgs,
       3,
       false,
-      mockOpenAI
+      [],
+      3
     );
-
-    expect(output).toEqual([]);
-    expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(3);
   });
 
   it("retries once then succeeds", async () => {
-    const mockOpenAI = createMockOpenAI([
-      { choices: [{ message: { content: "bad json" } }] },
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([{ question: "Retry", answer: "Success" }]),
+    await runStrictOutputTest(
+      [
+        { choices: [{ message: { content: "bad json" } }] },
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([{ question: "Retry", answer: "Success" }]),
+              },
             },
-          },
-        ],
-      },
-    ]);
-
-    const output = await strict_output(
-      "System prompt",
-      "User prompt",
-      { question: "", answer: "" },
-      "",
-      false,
-      "gpt-3.5-turbo",
-      1,
+          ],
+        },
+      ],
+      defaultArgs,
       3,
       false,
-      mockOpenAI
+      [{ question: "Retry", answer: "Success" }],
+      2
     );
-
-    expect(output).toEqual([{ question: "Retry", answer: "Success" }]);
-    expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(2);
   });
 
   it("handles list user_prompt and returns array output", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([
-                { question: "Q1", answer: "A1" },
-                { question: "Q2", answer: "A2" },
-              ]),
-            },
-          },
-        ],
-      },
-    ]);
-
-    const output = await strict_output(
+    const args = [
       "System prompt",
       ["input1", "input2"],
       { question: "", answer: "" },
@@ -138,33 +124,36 @@ describe("strict_output", () => {
       false,
       "gpt-3.5-turbo",
       1,
+    ];
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([
+                  { question: "Q1", answer: "A1" },
+                  { question: "Q2", answer: "A2" },
+                ]),
+              },
+            },
+          ],
+        },
+      ],
+      args,
       1,
       false,
-      mockOpenAI
+      [
+        { question: "Q1", answer: "A1" },
+        { question: "Q2", answer: "A2" },
+      ],
+      1
     );
-
-    expect(output).toEqual([
-      { question: "Q1", answer: "A1" },
-      { question: "Q2", answer: "A2" },
-    ]);
   });
 
   it("replaces invalid answers with default_category when allowed answers are set", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([{ question: "Q", answer: "InvalidAnswer" }]),
-            },
-          },
-        ],
-      },
-    ]);
-
     const output_format = { question: "", answer: ["Yes", "No"] };
-
-    const output = await strict_output(
+    const args = [
       "System prompt",
       "User prompt",
       output_format,
@@ -172,30 +161,30 @@ describe("strict_output", () => {
       false,
       "gpt-3.5-turbo",
       1,
+    ];
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([{ question: "Q", answer: "InvalidAnswer" }]),
+              },
+            },
+          ],
+        },
+      ],
+      args,
       1,
       false,
-      mockOpenAI
+      [{ question: "Q", answer: "No" }],
+      1
     );
-
-    expect(output).toEqual([{ question: "Q", answer: "No" }]);
   });
 
   it("keeps allowed answer as is", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([{ question: "Q", answer: "Yes" }]),
-            },
-          },
-        ],
-      },
-    ]);
-
     const output_format = { question: "", answer: ["Yes", "No"] };
-
-    const output = await strict_output(
+    const args = [
       "System prompt",
       "User prompt",
       output_format,
@@ -203,30 +192,30 @@ describe("strict_output", () => {
       false,
       "gpt-3.5-turbo",
       1,
+    ];
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([{ question: "Q", answer: "Yes" }]),
+              },
+            },
+          ],
+        },
+      ],
+      args,
       1,
       false,
-      mockOpenAI
+      [{ question: "Q", answer: "Yes" }],
+      1
     );
-
-    expect(output).toEqual([{ question: "Q", answer: "Yes" }]);
   });
 
   it("skips validation on keys matching <dynamic>", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([{ question: "Q", "<dynamic>": "value", answer: "A" }]),
-            },
-          },
-        ],
-      },
-    ]);
-
     const output_format = { question: "", "<dynamic>": "", answer: "" };
-
-    const output = await strict_output(
+    const args = [
       "System prompt",
       "User prompt",
       output_format,
@@ -234,28 +223,29 @@ describe("strict_output", () => {
       false,
       "gpt-3.5-turbo",
       1,
+    ];
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([{ question: "Q", "<dynamic>": "value", answer: "A" }]),
+              },
+            },
+          ],
+        },
+      ],
+      args,
       1,
       false,
-      mockOpenAI
+      [{ question: "Q", "<dynamic>": "value", answer: "A" }],
+      1
     );
-
-    expect(output).toEqual([{ question: "Q", "<dynamic>": "value", answer: "A" }]);
   });
 
   it("returns output values only if output_value_only=true", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([{ question: "Q", answer: "A" }]),
-            },
-          },
-        ],
-      },
-    ]);
-
-    const output = await strict_output(
+    const args = [
       "System prompt",
       "User prompt",
       { question: "", answer: "" },
@@ -263,43 +253,48 @@ describe("strict_output", () => {
       true, // output_value_only
       "gpt-3.5-turbo",
       1,
+    ];
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([{ question: "Q", answer: "A" }]),
+              },
+            },
+          ],
+        },
+      ],
+      args,
       1,
       false,
-      mockOpenAI
+      [{ question: "Q", answer: "A" }],
+      1
     );
-
-    // Cambiado: ahora espera el formato de objeto, no array de arrays
-    expect(output).toEqual([{ question: "Q", answer: "A" }]);
   });
 
   it("prints verbose logs if verbose=true", async () => {
-    const mockOpenAI = createMockOpenAI([
-      {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify([{ question: "Q", answer: "A" }]),
-            },
-          },
-        ],
-      },
-    ]);
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-
-    await strict_output(
-      "System prompt",
-      "User prompt",
-      { question: "", answer: "" },
-      "",
-      false,
-      "gpt-3.5-turbo",
+    await runStrictOutputTest(
+      [
+        {
+          choices: [
+            {
+              message: {
+                content: JSON.stringify([{ question: "Q", answer: "A" }]),
+              },
+            },
+          ],
+        },
+      ],
+      defaultArgs,
       1,
-      1,
-      true, // verbose
-      mockOpenAI
+      true,
+      [{ question: "Q", answer: "A" }],
+      1
     );
-
     expect(logSpy).toHaveBeenCalled();
     logSpy.mockRestore();
     errorSpy.mockRestore();
