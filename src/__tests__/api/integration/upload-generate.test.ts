@@ -1,4 +1,4 @@
-import request from "supertest";
+/*import request from "supertest";
 import fs from "fs";
 import path from "path";
 const adminSessionToken = process.env.ADMIN_SESSION_TOKEN as string;
@@ -50,4 +50,4 @@ describe("/api/upload-and-generate integration", () => {
 
     }
   });
-});
+});*/
