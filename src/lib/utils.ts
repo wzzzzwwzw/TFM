@@ -61,7 +61,7 @@ export function similarity(a: string, b: string) {
   return maxLen === 0 ? 1 : 1 - distance / maxLen;
 }
 
-// utils/statistics.ts
+
 export function calculateAccuracy(game: any): number {
   if (!game.questions.length) return 0;
   if (game.gameType === "mcq") {
