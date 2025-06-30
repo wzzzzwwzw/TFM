@@ -26,8 +26,11 @@ jobs:
         run: npm run build
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      - name: Use test environment
-        run: copy .env.test .env
+      - name: Start server
+        run: npm start &
+        env:
+         NODE_ENV: test
+
       - name: Wait for server to be ready
         run: npx wait-on http://localhost:3000
       - name: Run tests and collect coverage
